@@ -1,0 +1,36 @@
+export class UserResponseDto {
+  id: number;
+  telegramId: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  photoUrl?: string;
+  city?: string;
+  country?: string;
+  languages?: string[];
+  interests?: string[];
+  height?: number;
+  premium: boolean;
+  activityScore?: number;
+  gender?: string;
+  lookingFor?: string[];
+  relationStatus?: string;
+  sexuality?: string;
+  education?: string;
+  work?: string;
+  hobbies?: string[];
+  profileViews: number;
+  lastActive?: Date;
+  bio?: string;
+  verifiedAccount: boolean;
+  photos?: string[];
+  blockedUsers?: number[];
+  favoriteUsers?: number[];
+  age: number;
+
+  // New fields based on updated entity
+  languagePreferences?: string[];  // User's language preferences
+  reportedUsers?: number[];        // List of reported users' IDs
+  isDeleted?: boolean;             // Soft delete flag
+  language?: string;               // User's preferred language
+}
