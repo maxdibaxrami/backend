@@ -60,6 +60,15 @@ export class UserController {
     return this.transformToUserResponseDto(user);
   }
 
+  @Get('telegram/:telegramid')
+  async getUserByTelegramId(@Param('telegramid') telegramid: string): Promise<UserResponseDto> {
+    const user = await this.userService.findByTelegramId(telegramid);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return this.transformToUserResponseDto(user);
+  }
+
   // Fetch all users
   @Get()
   async getAllUsers(): Promise<UserResponseDto[]> {

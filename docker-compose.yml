@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: your_db_user       # Set the DB user (use your `DATABASE_USER` value here)
+      POSTGRES_PASSWORD: your_db_password  # Set the DB password (use your `DATABASE_PASSWORD` value here)
+      POSTGRES_DB: dating_app           # Set the DB name (use your `DATABASE_NAME` value here)
+    ports:
+      - "5432:5432"  # Expose the PostgreSQL port
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Persist data across container restarts
+    networks:
+      - app_network
+
+  app:
+    build: .
+    container_name: nestjs_app
+    ports:
+      - "3000:3000"  # Expose the NestJS app on port 3000
+    depends_on:
+      - db  # Ensure PostgreSQL starts before the app
+    environment:
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      - DATABASE_USER=your_db_user
+      - DATABASE_PASSWORD=your_db_password
+      - DATABASE_NAME=dating_app
+    networks:
+      - app_network
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    command: npm run start:dev  # Run the NestJS app in development mode
+
+volumes:
+  postgres_data:  # Volume for persisting PostgreSQL data
+
+networks:
+  app_network:
+    driver: bridge

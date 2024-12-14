@@ -1,37 +1,35 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import * as crypto from 'crypto';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { UserService } from '../user/user.service';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private userService: UserService,
+    private jwtService: JwtService,
+  ) {}
 
-  validateTelegramData(data: any): boolean {
-    const { hash, ...rest } = data;
-    const secretKey = crypto
-      .createHash('sha256')
-      .update('YOUR_TELEGRAM_BOT_TOKEN')
-      .digest();
-
-    const dataString = Object.keys(rest)
-      .sort()
-      .map((key) => `${key}=${rest[key]}`)
-      .join('\n');
-
-    const calculatedHash = crypto
-      .createHmac('sha256', secretKey)
-      .update(dataString)
-      .digest('hex');
-
-    if (calculatedHash !== hash) {
-      throw new UnauthorizedException('Invalid Telegram data.');
-    }
-
-    return true;
+  // For existing users
+  async login(user: User) {
+    const payload = { username: user.username, sub: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 
-  generateJwt(user: any): string {
-    const payload = { id: user.id, username: user.username };
-    return this.jwtService.sign(payload);
+  // For new users logging in via Telegram
+  async telegramLogin(user: any) {
+    const existingUser = await this.userService.findByTelegramId(user.telegramId);
+
+    if (!existingUser) {
+      // Handle registration logic here
+      return { message: 'Please complete registration' };
+    } else {
+      const payload = { username: existingUser.username, sub: existingUser.id };
+      return {
+        access_token: this.jwtService.sign(payload),
+      };
+    }
   }
 }

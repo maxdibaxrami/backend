@@ -133,5 +133,9 @@ export class UserService {
     user.language = language;
     return this.userRepository.save(user);
   }
+
+  async findByTelegramId(telegramId: string): Promise<User | undefined> {
+    return await this.userRepository.findOne({ where: { telegramId } });
+  }
   
 }
