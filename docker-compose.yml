@@ -5,9 +5,9 @@ services:
     image: postgres:latest
     container_name: postgres_db
     environment:
-      POSTGRES_USER: your_db_user       # Set the DB user (use your `DATABASE_USER` value here)
-      POSTGRES_PASSWORD: your_db_password  # Set the DB password (use your `DATABASE_PASSWORD` value here)
-      POSTGRES_DB: dating_app           # Set the DB name (use your `DATABASE_NAME` value here)
+      POSTGRES_USER: ${DATABASE_USER}       # Using .env variables
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}  # Using .env variables
+      POSTGRES_DB: ${DATABASE_NAME}           # Using .env variables
     ports:
       - "5432:5432"  # Expose the PostgreSQL port
     volumes:
@@ -25,9 +25,9 @@ services:
     environment:
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
-      - DATABASE_USER=your_db_user
-      - DATABASE_PASSWORD=your_db_password
-      - DATABASE_NAME=dating_app
+      - DATABASE_USER=${DATABASE_USER}         # Using .env variables
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD} # Using .env variables
+      - DATABASE_NAME=${DATABASE_NAME}         # Using .env variables
     networks:
       - app_network
     volumes:
