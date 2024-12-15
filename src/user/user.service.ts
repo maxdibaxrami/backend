@@ -12,13 +12,26 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async updateUserProfilePicture(id: number, filename: string): Promise<User> {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async addPhoto(id: number, photoPath: string): Promise<User> {
+    const user = await this.getUserById(id);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException(`User with ID ${id} not found`);
     }
-    user.photoUrl = filename;
-    return this.userRepository.save(user);
+
+    // Initialize the photos array if it's undefined
+    if (!user.photos) {
+      user.photos = [];
+    }
+
+    // Add the new photo path to the photos array
+    user.photos.push(photoPath);
+
+    // Save the user entity with the updated photos array
+    return await this.userRepository.save(user);
+  }
+
+  async updateUserPhotos(user: User): Promise<User> {
+    return await this.userRepository.save(user); // Save the updated user entity with new photos
   }
 
   async softDeleteUser(id: number): Promise<User> {

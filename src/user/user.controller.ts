@@ -12,23 +12,18 @@ import {
   UseInterceptors, 
   UploadedFile
 } from '@nestjs/common';
-import { UserService } from './user.service';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { fileFilter, storage } from './file-upload.utils';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Multer } from 'multer';
+import { UserService } from './user.service';
+import { diskStorage } from 'multer';
+import * as path from 'path';
+
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
-
-  @Post('upload/:id')
-  @UseInterceptors(FileInterceptor('file', { storage, fileFilter }))
-  async uploadProfilePicture(@Param('id') id: number, @UploadedFile() file: Express.Multer.File) {
-    return this.userService.updateUserProfilePicture(id, file.filename);
-  }
 
   // Create a new user profile
   @Post('create')
@@ -49,6 +44,21 @@ export class UserController {
     }
     return this.transformToUserResponseDto(user);
   }
+
+
+  @Delete(':id')
+  async deleteUser(
+    @Param('id') id: number, 
+  ): Promise<string> {
+    const user = await this.userService.deleteUser(id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+    return "user deleted";
+  }
+
+
+  
 
   // Fetch user profile by ID
   @Get(':id')
@@ -74,6 +84,50 @@ export class UserController {
   async getAllUsers(): Promise<UserResponseDto[]> {
     const users = await this.userService.getAllUsers();
     return users.map(this.transformToUserResponseDto);
+  }
+
+  // Upload profile picture and add to user's photos array
+  @Post('upload/:id')
+  @UseInterceptors(FileInterceptor('image', {
+    storage: diskStorage({
+      destination: './uploads/profile-pictures', // Path to save images
+      filename: (req, file, callback) => {
+        const fileExtName = path.extname(file.originalname); // Extract file extension
+        const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`; // Generate a unique filename with extension
+        callback(null, fileName); // Save the file with the unique name
+      }
+    }),
+  }))
+  async uploadProfilePicture(
+    @Param('id') id: number, 
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new HttpException('File not provided', HttpStatus.BAD_REQUEST); // Handle file not provided error
+    }
+
+    // Fetch user by ID
+    const user = await this.userService.getUserById(id);
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND); // Handle user not found error
+    }
+
+    // Ensure user photos array exists
+    if (!user.photos) {
+      user.photos = [];
+    }
+
+    // Save the file path in the user's photos array
+    const filePath = `/uploads/profile-pictures/${file.filename}`;
+    user.photos.push(filePath);
+
+    // Update the user's photos in the database
+    await this.userService.updateUserPhotos(user);
+
+    return {
+      message: 'Image uploaded successfully',
+      photos: user.photos, // Return updated photos
+    };
   }
 
   // Delete a user
@@ -123,7 +177,6 @@ export class UserController {
       username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
-      photoUrl: user.photoUrl,
       city: user.city,
       country: user.country,
       languages: user.languages,

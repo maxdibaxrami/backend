@@ -4,7 +4,6 @@ export class UserResponseDto {
   username?: string;
   firstName?: string;
   lastName?: string;
-  photoUrl?: string;
   city?: string;
   country?: string;
   languages?: string[];

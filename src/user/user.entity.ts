@@ -21,9 +21,6 @@ export class User {
   lastName?: string;
 
   @Column({ nullable: true })
-  photoUrl?: string;
-
-  @Column({ nullable: true })
   city?: string;
 
   @Column({ nullable: true })
