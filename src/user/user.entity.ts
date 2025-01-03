@@ -2,9 +2,22 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 import { Like } from '../like/like.entity';
 import { Match } from '../match/match.entity';
 import { Message } from '../message/entities/message.entity';
+import { Photo } from '../photo/photo.entity';  // Import the Photo entity
 
 @Entity('users')
 export class User {
+  @OneToMany(() => Like, like => like.user, { cascade: true })
+  sentLikes: Like[];
+
+  @OneToMany(() => Like, like => like.likedUser, { cascade: true })
+  receivedLikes: Like[];
+
+  @OneToMany(() => Match, match => match.user, { cascade: true })
+  matches: Match[];
+
+  @OneToMany(() => Match, match => match.likedUser, { cascade: true })
+  likedMatches: Match[];
+
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -26,10 +39,10 @@ export class User {
   @Column({ nullable: true })
   country?: string;
 
-  @Column('text', { array: true, nullable: true })
+  @Column('text', { array: true, nullable: true, default: []  })
   languages?: string[];
 
-  @Column('simple-array', { nullable: true })
+  @Column('simple-array', { nullable: true, default: []  })
   interests?: string[];
 
   @Column({ nullable: true })
@@ -44,8 +57,8 @@ export class User {
   @Column({ nullable: true })
   gender?: string;
 
-  @Column({ type: 'simple-array', nullable: true })
-  lookingFor?: string[];
+  @Column({ nullable: true })
+  lookingFor?: string;
 
   @Column({ nullable: true })
   relationStatus?: string;
@@ -59,7 +72,7 @@ export class User {
   @Column({ nullable: true })
   work?: string;
 
-  @Column('simple-array', { nullable: true })
+  @Column('simple-array', { nullable: true, default: [] })
   hobbies?: string[];
 
   @Column({ default: 0 })
@@ -74,16 +87,13 @@ export class User {
   @Column({ default: false })
   verifiedAccount: boolean;
 
-  @Column('simple-array', { nullable: true })
-  photos?: string[];
-
-  @Column('int', { array: true, nullable: true })
+  @Column('int', { array: true, nullable: true, default: []  })
   blockedUsers: number[];// List of blocked user IDs
 
   @Column('simple-array', { default: [] })
   reportedUsers: number[];  // List of reported user IDs
 
-  @Column('simple-array', { nullable: true })
+  @Column('simple-array', { nullable: true, default: []  })
   favoriteUsers?: number[];
 
   @Column({ default: false })
@@ -92,32 +102,29 @@ export class User {
   @Column({ default: 'en' })
   language: string;
 
-    // Sent likes (user who likes)
-    @OneToMany(() => Like, (like) => like.user)
-    sentLikes: Like[];
-  
-    // Received likes (user who gets liked)
-    @OneToMany(() => Like, (like) => like.likedUser)
-    receivedLikes: Like[];
+  @Column('decimal', { precision: 10, scale: 6,nullable:true })
+  lat?: number;
+
+  @Column('decimal', { precision: 10, scale: 6, nullable:true })
+  lon?: number;
   
     // Matches as user1
-    @OneToMany(() => Match, (match) => match.user)  // Correct reference to `user`
-    matches: Match[];
-  
-    @OneToMany(() => Match, (match) => match.likedUser)  // Correct reference to `likedUser`
-    likedMatches: Match[];
+
 
     @Column({ nullable: true })
     age: number; // New field for age
 
     @Column('simple-array', { nullable: true })
     languagePreferences: string[]; // New field for language preferences
-
-    @OneToMany(() => Message, (message) => message.sender)
+    
+    @OneToMany(() => Message, (message) => message.sender, { onDelete: 'CASCADE' })
     sentMessages: Message[];
-
-    @OneToMany(() => Message, (message) => message.recipient)
+    
+    @OneToMany(() => Message, (message) => message.recipient, { onDelete: 'CASCADE' })
     receivedMessages: Message[];
 
+    @OneToMany(() => Photo, (photo) => photo.user, { eager: true })
+    photos: Photo[];
     
 }
+

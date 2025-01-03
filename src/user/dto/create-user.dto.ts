@@ -1,4 +1,5 @@
 import { IsString, IsArray, IsOptional, IsBoolean, IsInt, IsNumber, IsDate } from 'class-validator';
+import { Photo } from 'src/photo/photo.entity';
 
 export class CreateUserDto {
   @IsString()
@@ -54,9 +55,8 @@ export class CreateUserDto {
   @IsOptional()
   gender: string;
 
-  @IsArray()
   @IsOptional()
-  lookingFor: string[];
+  lookingFor: string;
 
   @IsString()
   @IsOptional()
@@ -96,7 +96,7 @@ export class CreateUserDto {
 
   @IsArray()
   @IsOptional()
-  photos: string[];
+  photos: Photo[];
 
   @IsArray()
   @IsOptional()
@@ -105,4 +105,13 @@ export class CreateUserDto {
   @IsArray()
   @IsOptional()
   favoriteUsers: number[];
+
+  @IsOptional()
+  @IsNumber()
+  lat?: number;
+
+  @IsOptional()
+  @IsNumber()
+  lon?: number;
 }
+

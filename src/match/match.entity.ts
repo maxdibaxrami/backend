@@ -7,11 +7,11 @@ export class Match {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne(() => User, (user) => user.matches)
+  @ManyToOne(() => User, (user) => user.matches, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => User, (user) => user.likedMatches)
+  @ManyToOne(() => User, (user) => user.likedMatches, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'liked_user_id' })
   likedUser: User;
 

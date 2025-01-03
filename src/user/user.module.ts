@@ -1,14 +1,19 @@
-// src/user/user.module.ts
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
+import { PhotoModule } from '../photo/photo.module';  // Ensure correct import of PhotoModule
+import { Like } from 'src/like/like.entity';
+import { Match } from 'src/match/match.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])], // Register UserRepository here
-  providers: [UserService],
+  imports: [
+    TypeOrmModule.forFeature([User,Like,Match]),  // Register User entity for TypeORM
+    forwardRef(() => PhotoModule),  // Use forwardRef to avoid circular dependency
+  ],
+  providers: [UserService],  // UserService depends on UserRepository and PhotoService
   controllers: [UserController],
-  exports: [UserService], // Export UserRepository here
+  exports: [UserService],  // Export UserService if needed by other modules
 })
 export class UserModule {}

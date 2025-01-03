@@ -10,7 +10,8 @@ import {
   HttpException, 
   HttpStatus , 
   UseInterceptors, 
-  UploadedFile
+  UploadedFile,
+  Query
 } from '@nestjs/common';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -20,11 +21,14 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { diskStorage } from 'multer';
 import * as path from 'path';
+import { PhotoService } from '../photo/photo.service';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
-
+  constructor(
+    private readonly userService: UserService,
+    private readonly photoService: PhotoService,  // Inject PhotoService
+  ) {}
   // Create a new user profile
   @Post('create')
   async createUser(@Body() createUserDto: CreateUserDto): Promise<UserResponseDto> {
@@ -86,49 +90,6 @@ export class UserController {
     return users.map(this.transformToUserResponseDto);
   }
 
-  // Upload profile picture and add to user's photos array
-  @Post('upload/:id')
-  @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads/profile-pictures', // Path to save images
-      filename: (req, file, callback) => {
-        const fileExtName = path.extname(file.originalname); // Extract file extension
-        const fileName = `${Date.now()}-${Math.round(Math.random() * 1e9)}.jpg`; // Generate a unique filename with extension
-        callback(null, fileName); // Save the file with the unique name
-      }
-    }),
-  }))
-  async uploadProfilePicture(
-    @Param('id') id: number, 
-    @UploadedFile() file: Express.Multer.File
-  ) {
-    if (!file) {
-      throw new HttpException('File not provided', HttpStatus.BAD_REQUEST); // Handle file not provided error
-    }
-
-    // Fetch user by ID
-    const user = await this.userService.getUserById(id);
-    if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND); // Handle user not found error
-    }
-
-    // Ensure user photos array exists
-    if (!user.photos) {
-      user.photos = [];
-    }
-
-    // Save the file path in the user's photos array
-    const filePath = `/uploads/profile-pictures/${file.filename}`;
-    user.photos.push(filePath);
-
-    // Update the user's photos in the database
-    await this.userService.updateUserPhotos(user);
-
-    return {
-      message: 'Image uploaded successfully',
-      photos: user.photos, // Return updated photos
-    };
-  }
 
   // Delete a user
   @Post('delete/:id')
@@ -156,6 +117,41 @@ export class UserController {
     return this.userService.setUserLanguage(id, language);
   }
 
+  @Get('filter/:userId')
+  async getFilteredMatches(
+    @Param('userId') userId: number,
+    @Query('ageRange') ageRange: string, // Example: "18,25"
+    @Query('city') city?: string,
+    @Query('country') country?: string,
+    @Query('languages') languages?: string, // Example: "English,Spanish"
+    @Query('page') page = '1', // Default to page 1
+    @Query('limit') limit = '10', // Default to 10 items per page
+  ): Promise<{ users: UserResponseDto[], total: number, page: number, limit: number }> {
+    // Parse query parameters
+    const ageRangeParsed = ageRange ? ageRange.split(',').map(Number) as [number, number] : undefined;
+    const languagesParsed = languages ? languages.split(',') : undefined;
+    const pageParsed = parseInt(page, 10);
+    const limitParsed = parseInt(limit, 10);
+  
+    // Pass parsed filters and pagination to the service
+    const { users, total } = await this.userService.getAvailableUsersForLike(userId, {
+      ageRange: ageRangeParsed,
+      city,
+      country,
+      languages: languagesParsed,
+    }, {
+      page: pageParsed,
+      limit: limitParsed,
+    });
+  
+    return {
+      users: users.map(this.transformToUserResponseDto),
+      total,
+      page: pageParsed,
+      limit: limitParsed,
+    };
+  }
+  
   // Patch a user profile (update specific fields)
   @Patch(':id')
   async patchUser(
@@ -168,6 +164,50 @@ export class UserController {
     }
     return this.transformToUserResponseDto(user);
   }
+
+
+  @Get('explore/basic/:userId')
+  async exploreFilteredUsersBasic(
+    @Param('userId') userId: number,
+    @Query('ageRange') ageRange: string, // Example: "18,25"
+    @Query('city') city?: string,
+    @Query('country') country?: string,
+    @Query('languages') languages?: string, // Example: "English,Spanish"
+    @Query('page') page = '1', // Default to page 1
+    @Query('limit') limit = '10', // Default to 10 items per page
+  ): Promise<{ users: { id: number,verifiedAccount:boolean, firstName: string, age: number, photo: string | null }[], total: number, page: number, limit: number }> {
+    // Parse query parameters
+    const ageRangeParsed = ageRange ? ageRange.split(',').map(Number) as [number, number] : undefined;
+    const languagesParsed = languages ? languages.split(',') : undefined;
+    const pageParsed = parseInt(page, 10);
+    const limitParsed = parseInt(limit, 10);
+  
+    // Pass parsed filters and pagination to the service
+    const { users, total } = await this.userService.getExploreUsersBasic(userId, {
+      ageRange: ageRangeParsed,
+      city,
+      country,
+      languages: languagesParsed,
+    }, {
+      page: pageParsed,
+      limit: limitParsed,
+    });
+  
+    return {
+      users: users.map(user => ({
+        id: user.id,
+        firstName: user.firstName,
+        age: user.age,
+        verifiedAccount: user.verifiedAccount,
+        photo: user.photos[0]?.url || null, // Assuming the first photo is the main one
+      })),
+      total,
+      page: pageParsed,
+      limit: limitParsed,
+    };
+  }
+  
+
 
   // Helper function to transform User entity to UserResponseDto
   private transformToUserResponseDto(user: User): UserResponseDto {
@@ -195,7 +235,11 @@ export class UserController {
       lastActive: user.lastActive,
       bio: user.bio,
       verifiedAccount: user.verifiedAccount,
-      photos: user.photos,
+      photos: user.photos ? user.photos.map(photo => ({
+        id: photo.id,
+        url: photo.url,
+        order: photo.order,
+      })) : [], 
       blockedUsers: user.blockedUsers,
       favoriteUsers: user.favoriteUsers,
       age: user.age,
@@ -203,6 +247,9 @@ export class UserController {
       reportedUsers: user.reportedUsers,             // Add reported users
       isDeleted: user.isDeleted,                     // Add soft delete flag
       language: user.language,                       // Add language
+      lat:user.lat,
+      lon:user.lon,
+      
     };
   }  
 }

@@ -1,34 +1,24 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Photo } from '../photo/photo.entity';
+import { Like } from 'src/like/like.entity';
+import { Match } from 'src/match/match.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Like) // If you're using Like repository
+    private likeRepository: Repository<Like>,
+    @InjectRepository(Like) // If you're using Like repository
+    private matchRepository: Repository<Match>,
   ) {}
 
-  async addPhoto(id: number, photoPath: string): Promise<User> {
-    const user = await this.getUserById(id);
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-
-    // Initialize the photos array if it's undefined
-    if (!user.photos) {
-      user.photos = [];
-    }
-
-    // Add the new photo path to the photos array
-    user.photos.push(photoPath);
-
-    // Save the user entity with the updated photos array
-    return await this.userRepository.save(user);
-  }
 
   async updateUserPhotos(user: User): Promise<User> {
     return await this.userRepository.save(user); // Save the updated user entity with new photos
@@ -151,4 +141,192 @@ export class UserService {
     return await this.userRepository.findOne({ where: { telegramId } });
   }
   
+   // Fetch user by ID
+   async getUserByIdPhoto(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['photos'], // Make sure this includes the relation to photos if needed
+    });
+
+    if (!user) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    return user;
+  }
+
+  // If you handle updating user with photo details here
+  async addPhotoToUser(user: User, photo: Photo) {
+    if (!user.photos) {
+      user.photos = [];
+    }
+
+    user.photos.push(photo);
+    await this.userRepository.save(user);
+  }
+
+  async getAvailableUsersForLike(
+    userId: number,
+    filters: {
+      ageRange?: [number, number]; // [minAge, maxAge]
+      city?: string;
+      country?: string;
+      languages?: string[];
+    },
+    pagination: {
+      page: number; // Page number
+      limit: number; // Number of items per page
+    },
+  ): Promise<{ users: User[], total: number }> {
+    const query = this.userRepository.createQueryBuilder('user');
+  
+    // Exclude the current user
+    query.where('user.id != :userId', { userId });
+  
+    // Exclude users who have been liked or have matched
+    const likedUsersSubquery = this.likeRepository
+      .createQueryBuilder('like')
+      .select('like.likedUserId')
+      .where('like.userId = :userId', { userId })
+      .andWhere('like.isLiked = true');
+  
+    query.andWhere(`user.id NOT IN (${likedUsersSubquery.getQuery()})`);
+  
+    const likedByUsersSubquery = this.likeRepository
+      .createQueryBuilder('like')
+      .select('like.userId')
+      .where('like.likedUserId = :userId', { userId })
+      .andWhere('like.isLiked = true');
+  
+    query.andWhere(`user.id NOT IN (${likedByUsersSubquery.getQuery()})`);
+  
+    const matchedUsersSubquery = this.matchRepository
+      .createQueryBuilder('match')
+      .select('match.likedUserId')
+      .where('match.userId = :userId', { userId });
+  
+    query.andWhere(`user.id NOT IN (${matchedUsersSubquery.getQuery()})`);
+  
+    // Apply filters
+    if (filters.ageRange) {
+      query.andWhere('user.age BETWEEN :minAge AND :maxAge', {
+        minAge: filters.ageRange[0],
+        maxAge: filters.ageRange[1],
+      });
+    }
+  
+    if (filters.city) {
+      query.andWhere('user.city = :city', { city: filters.city });
+    }
+  
+    if (filters.country) {
+      query.andWhere('user.country = :country', { country: filters.country });
+    }
+  
+    if (filters.languages) {
+      query.andWhere('user.languages @> ARRAY[:...languages]::text[]', {
+        languages: filters.languages,
+      });
+    }
+  
+    // Include photos
+    query.leftJoinAndSelect('user.photos', 'photos');
+  
+    // Pagination: Apply skip and take based on page and limit
+    const skip = (pagination.page - 1) * pagination.limit;
+    query.skip(skip).take(pagination.limit);
+  
+    // Fetch total count of users before applying pagination
+    const total = await query.getCount();
+  
+    // Fetch available users with pagination
+    const users = await query.getMany();
+  
+    return { users, total };
+  }
+  
+  async getExploreUsersBasic(
+    userId: number,
+    filters: {
+      ageRange?: [number, number]; // [minAge, maxAge]
+      city?: string;
+      country?: string;
+      languages?: string[];
+    },
+    pagination: {
+      page: number; // Page number
+      limit: number; // Number of items per page
+    },
+  ): Promise<{ users: User[], total: number }> {
+    const query = this.userRepository.createQueryBuilder('user');
+  
+    // Exclude the current user
+    query.where('user.id != :userId', { userId });
+  
+    // Exclude users who have already been liked or matched
+    const likedUsersSubquery = this.likeRepository
+      .createQueryBuilder('like')
+      .select('like.likedUserId')
+      .where('like.userId = :userId', { userId })
+      .andWhere('like.isLiked = true');
+  
+    query.andWhere(`user.id NOT IN (${likedUsersSubquery.getQuery()})`);
+  
+    const likedByUsersSubquery = this.likeRepository
+      .createQueryBuilder('like')
+      .select('like.userId')
+      .where('like.likedUserId = :userId', { userId })
+      .andWhere('like.isLiked = true');
+  
+    query.andWhere(`user.id NOT IN (${likedByUsersSubquery.getQuery()})`);
+  
+    const matchedUsersSubquery = this.matchRepository
+      .createQueryBuilder('match')
+      .select('match.likedUserId')
+      .where('match.userId = :userId', { userId });
+  
+    query.andWhere(`user.id NOT IN (${matchedUsersSubquery.getQuery()})`);
+  
+    // Apply filters
+    if (filters.ageRange) {
+      query.andWhere('user.age BETWEEN :minAge AND :maxAge', {
+        minAge: filters.ageRange[0],
+        maxAge: filters.ageRange[1],
+      });
+    }
+  
+    if (filters.city) {
+      query.andWhere('user.city = :city', { city: filters.city });
+    }
+  
+    if (filters.country) {
+      query.andWhere('user.country = :country', { country: filters.country });
+    }
+  
+    if (filters.languages) {
+      query.andWhere('user.languages @> ARRAY[:...languages]::text[]', {
+        languages: filters.languages,
+      });
+    }
+  
+    // Include photos
+    query.leftJoinAndSelect('user.photos', 'photos');
+  
+    // Pagination: Apply skip and take based on page and limit
+    const skip = (pagination.page - 1) * pagination.limit;
+    query.skip(skip).take(pagination.limit);
+  
+    // Fetch total count of users before applying pagination
+    const total = await query.getCount();
+  
+    // Fetch available users with pagination
+    const users = await query.getMany();
+  
+    return { users, total };
+  }
+  
+  
+  
 }
+
+

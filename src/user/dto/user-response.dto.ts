@@ -1,3 +1,4 @@
+
 export class UserResponseDto {
   id: number;
   telegramId: string;
@@ -12,7 +13,7 @@ export class UserResponseDto {
   premium: boolean;
   activityScore?: number;
   gender?: string;
-  lookingFor?: string[];
+  lookingFor?: string;
   relationStatus?: string;
   sexuality?: string;
   education?: string;
@@ -22,11 +23,12 @@ export class UserResponseDto {
   lastActive?: Date;
   bio?: string;
   verifiedAccount: boolean;
-  photos?: string[];
+  photos?: { id: number, url: string, order: number }[];  // Include photos
   blockedUsers?: number[];
   favoriteUsers?: number[];
   age: number;
-
+  lat?: number;
+  lon?: number;
   // New fields based on updated entity
   languagePreferences?: string[];  // User's language preferences
   reportedUsers?: number[];        // List of reported users' IDs

@@ -3,12 +3,16 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { LikeModule } from './like/like.module';
 import { MatchModule } from './match/match.module';
 import { ChatModule } from './chat/chat.module';
 import { MessageModule } from './message/message.module';
+import { PhotoModule } from './photo/photo.module';
 
 @Module({
   imports: [
@@ -29,12 +33,17 @@ import { MessageModule } from './message/message.module';
         synchronize: true, // Sync schema (disable in production)
       }),
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), // Path to your 'uploads' folder
+      serveRoot: '/uploads', // This will make files accessible via '/uploads' URL path
+    }),
     AuthModule,
     UserModule,
     LikeModule,
     MatchModule,
     ChatModule,
     MessageModule,
+    PhotoModule,
   ],
   controllers: [AppController],
   providers: [AppService],
