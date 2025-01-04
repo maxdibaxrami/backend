@@ -5,39 +5,43 @@ services:
     image: postgres:latest
     container_name: postgres_db
     environment:
-      POSTGRES_USER: ${DATABASE_USER}       # Using .env variables
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}  # Using .env variables
-      POSTGRES_DB: ${DATABASE_NAME}           # Using .env variables
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
     ports:
-      - "5432:5432"  # Expose the PostgreSQL port
+      - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persist data across container restarts
+      - postgres_data:/var/lib/postgresql/data
     networks:
       - app_network
+    env_file:
+      - .env  # Load environment variables from .env file
 
   app:
     build: .
     container_name: nestjs_app
     ports:
-      - "3000:3000"  # Expose the NestJS app on port 3000
+      - "3000:3000"
     depends_on:
-      - db  # Ensure PostgreSQL starts before the app
+      - db
     environment:
       - DATABASE_HOST=db
       - DATABASE_PORT=5432
-      - DATABASE_USER=${DATABASE_USER}         # Using .env variables
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD} # Using .env variables
-      - DATABASE_NAME=${DATABASE_NAME}         # Using .env variables
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
     networks:
       - app_network
     volumes:
       - .:/usr/src/app
       - ./uploads:/usr/src/app/uploads
     working_dir: /usr/src/app
-    command: npm run start:dev  # Run the NestJS app in development mode
+    command: npm run start:dev
+    env_file:
+      - .env  # Load environment variables from .env file
 
 volumes:
-  postgres_data:  # Volume for persisting PostgreSQL data
+  postgres_data:
 
 networks:
   app_network:
