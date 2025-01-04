@@ -183,6 +183,14 @@ export class UserService {
     // Exclude the current user
     query.where('user.id != :userId', { userId });
   
+    // Get the gender of the authenticated user
+    const currentUser = await this.userRepository.findOne({ where: { id: userId } });
+    if (!currentUser) {
+      throw new Error('User not found');
+    }
+  
+    const oppositeGender = currentUser.gender === 'male' ? 'female' : 'male';
+  
     // Exclude users who have been liked or have matched
     const likedUsersSubquery = this.likeRepository
       .createQueryBuilder('like')
@@ -229,6 +237,9 @@ export class UserService {
       });
     }
   
+    // Filter by opposite gender
+    query.andWhere('user.gender = :gender', { gender: oppositeGender });
+  
     // Include photos
     query.leftJoinAndSelect('user.photos', 'photos');
   
@@ -245,6 +256,7 @@ export class UserService {
     return { users, total };
   }
   
+  
   async getExploreUsersBasic(
     userId: number,
     filters: {
@@ -252,6 +264,7 @@ export class UserService {
       city?: string;
       country?: string;
       languages?: string[];
+      genderFilter?: 'female' | 'male' | 'all'; // Add gender filter option
     },
     pagination: {
       page: number; // Page number
@@ -287,7 +300,12 @@ export class UserService {
   
     query.andWhere(`user.id NOT IN (${matchedUsersSubquery.getQuery()})`);
   
-    // Apply filters
+    // Apply gender filter
+    if (filters.genderFilter && filters.genderFilter !== 'all') {
+      query.andWhere('user.gender = :genderFilter', { genderFilter: filters.genderFilter.toLowerCase() });
+    }
+  
+    // Apply other filters (ageRange, city, country, languages)
     if (filters.ageRange) {
       query.andWhere('user.age BETWEEN :minAge AND :maxAge', {
         minAge: filters.ageRange[0],
@@ -324,6 +342,7 @@ export class UserService {
   
     return { users, total };
   }
+  
   
   
   

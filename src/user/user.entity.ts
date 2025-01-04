@@ -21,7 +21,7 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true })
   telegramId: string;
 
   @Column({ nullable: true })
@@ -31,18 +31,15 @@ export class User {
   firstName?: string;
 
   @Column({ nullable: true })
-  lastName?: string;
-
-  @Column({ nullable: true })
   city?: string;
 
   @Column({ nullable: true })
   country?: string;
 
-  @Column('text', { array: true, nullable: true, default: []  })
+  @Column('text', { array: true, nullable: true, default: [] })
   languages?: string[];
 
-  @Column('simple-array', { nullable: true, default: []  })
+  @Column('text', { array: true, nullable: true, default: [] })
   interests?: string[];
 
   @Column({ nullable: true })
@@ -51,20 +48,20 @@ export class User {
   @Column({ default: false })
   premium: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: 0 })
   activityScore?: number;
 
-  @Column({ nullable: true })
-  gender?: string;
+  @Column({ nullable: false })
+  gender: string;
 
-  @Column({ nullable: true })
-  lookingFor?: string;
+  @Column({ nullable: false , default: "1" })
+  lookingFor: string;
 
-  @Column({ nullable: true })
-  relationStatus?: string;
+  @Column({ nullable: false })
+  relationStatus: string;
 
-  @Column({ nullable: true })
-  sexuality?: string;
+  @Column({ nullable: false, default: "straight" })
+  sexuality: string;
 
   @Column({ nullable: true })
   education?: string;
@@ -72,11 +69,8 @@ export class User {
   @Column({ nullable: true })
   work?: string;
 
-  @Column('simple-array', { nullable: true, default: [] })
-  hobbies?: string[];
-
-  @Column({ default: 0 })
-  profileViews: number;
+  @Column('text', { array: true, nullable: true, default: [] })
+  profileViews: string[];
 
   @Column({ nullable: true })
   lastActive?: Date;
@@ -84,47 +78,56 @@ export class User {
   @Column({ nullable: true })
   bio?: string;
 
+  @Column({ nullable: false, default: "ratthernotsay" })
+  kids: string;
+
+  @Column({ nullable: false, default: "ratthernotsay" })
+  smoking: string;
+
+  @Column({ nullable: false, default: "ratthernotsay" })
+  drink: string;
+
+  @Column({ nullable: false, default: "ratthernotsay" })
+  pets: string;
+
   @Column({ default: false })
   verifiedAccount: boolean;
 
-  @Column('int', { array: true, nullable: true, default: []  })
-  blockedUsers: number[];// List of blocked user IDs
+  @Column('int', { array: true, nullable: true, default: [] })
+  blockedUsers: number[];
 
   @Column('simple-array', { default: [] })
-  reportedUsers: number[];  // List of reported user IDs
+  reportedUsers: number[];
 
-  @Column('simple-array', { nullable: true, default: []  })
+  @Column('simple-array', { nullable: true, default: [] })
   favoriteUsers?: number[];
 
   @Column({ default: false })
-  isDeleted: boolean;  // Soft delete flag
+  isDeleted: boolean;
 
   @Column({ default: 'en' })
   language: string;
 
-  @Column('decimal', { precision: 10, scale: 6,nullable:true })
+  @Column('decimal', { precision: 10, scale: 7, nullable: true })
   lat?: number;
 
-  @Column('decimal', { precision: 10, scale: 6, nullable:true })
+  @Column('decimal', { precision: 10, scale: 7, nullable: true })
   lon?: number;
-  
-    // Matches as user1
 
+  @Column({ nullable: true })
+  age?: number;
 
-    @Column({ nullable: true })
-    age: number; // New field for age
+  @Column('simple-array', { nullable: true })
+  languagePreferences: string[];
 
-    @Column('simple-array', { nullable: true })
-    languagePreferences: string[]; // New field for language preferences
-    
-    @OneToMany(() => Message, (message) => message.sender, { onDelete: 'CASCADE' })
-    sentMessages: Message[];
-    
-    @OneToMany(() => Message, (message) => message.recipient, { onDelete: 'CASCADE' })
-    receivedMessages: Message[];
+  @OneToMany(() => Message, (message) => message.sender, { onDelete: 'CASCADE' })
+  sentMessages: Message[];
 
-    @OneToMany(() => Photo, (photo) => photo.user, { eager: true })
-    photos: Photo[];
-    
+  @OneToMany(() => Message, (message) => message.recipient, { onDelete: 'CASCADE' })
+  receivedMessages: Message[];
+
+  @OneToMany(() => Photo, (photo) => photo.user, { eager: true })
+  photos: Photo[];
 }
+
 

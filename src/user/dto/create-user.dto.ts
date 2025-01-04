@@ -74,13 +74,11 @@ export class CreateUserDto {
   @IsOptional()
   work: string;
 
+  @IsOptional()
   @IsArray()
-  @IsOptional()
-  hobbies: string[];
-
-  @IsNumber()
-  @IsOptional()
-  profileViews: number;
+  @IsString({ each: true })
+  profileViews: string[];
+  
 
   @IsDate()
   @IsOptional()

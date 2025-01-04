@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Like } from './like.entity';
 import { Match } from '../match/match.entity';
 import { User } from '../user/user.entity';
+import { UserResponseDto } from 'src/user/dto/user-response.dto';
 
 @Injectable()
 export class LikeService {
@@ -81,13 +82,64 @@ export class LikeService {
   }
   
 
-  async getLikesByUser(userId: number): Promise<User[]> {
+  async getLikesByUser(userId: number): Promise<UserResponseDto[]> {
     const likes = await this.likeRepository.find({
       where: { likedUser: { id: userId }, isLiked: false },
-      relations: ['user'],  // Include the user who liked
+      relations: ['user', 'user.photos'],  // Include the user who liked and their photos
     });
-
-    // Map over the 'likes' to extract the users who liked the specified user
-    return likes.map(like => like.user);
+  
+    // Map over the 'likes' to extract the users and transform them to the desired format
+    return likes.map(like => this.transformToUserResponseDto(like.user));
   }
+  
+  // Helper function to transform User entity to UserResponseDto
+  private transformToUserResponseDto(user: User): UserResponseDto {
+    return {
+      id: user.id,
+      telegramId: user.telegramId,
+      username: user.username,
+      firstName: user.firstName,
+      city: user.city,
+      profileData: {
+        lookingFor: user.lookingFor,
+        education: user.education,
+        work: user.work,
+        bio: user.bio,
+      },
+      moreAboutMe: {
+        languages: user.languages,
+        height: user.height,
+        relationStatus: user.relationStatus,
+        sexuality: user.sexuality,
+        kids: user.kids,
+        smoking: user.smoking,
+        drink: user.drink,
+        pets: user.pets
+      },
+      country: user.country,
+      interests: user.interests,
+      premium: user.premium,
+      activityScore: user.activityScore,
+      gender: user.gender,
+      profileViews: user.profileViews,
+      lastActive: user.lastActive,
+      verifiedAccount: user.verifiedAccount,
+      photos: user.photos ? user.photos.map(photo => ({
+        id: photo.id,
+        url: photo.url,
+        order: photo.order,
+      })) : [],
+      blockedUsers: user.blockedUsers,
+      favoriteUsers: user.favoriteUsers,
+      age: user.age,
+      languagePreferences: user.languagePreferences,
+      isDeleted: user.isDeleted,
+      language: user.language,
+      lat: user.lat,
+      lon: user.lon,
+    };
+  }
+  
 }
+
+

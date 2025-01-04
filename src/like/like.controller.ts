@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Param, Get } from '@nestjs/common';
 import { LikeService } from './like.service';
+import { UserResponseDto } from 'src/user/dto/user-response.dto';
 
 @Controller('like')
 export class LikeController {
@@ -11,7 +12,7 @@ export class LikeController {
   }
 
   @Get(':userId/likes')
-  async getLikes(@Param('userId') userId: number) {
+  async getLikes(@Param('userId') userId: number): Promise<UserResponseDto[]> {
     return this.likeService.getLikesByUser(userId);
   }
 }

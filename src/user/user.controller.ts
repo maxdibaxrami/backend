@@ -155,7 +155,7 @@ export class UserController {
   // Patch a user profile (update specific fields)
   @Patch(':id')
   async patchUser(
-    @Param('id') id: number, 
+    @Param('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<UserResponseDto> {
     const user = await this.userService.patchUser(id, updateUserDto);
@@ -173,26 +173,28 @@ export class UserController {
     @Query('city') city?: string,
     @Query('country') country?: string,
     @Query('languages') languages?: string, // Example: "English,Spanish"
+    @Query('genderFilter') genderFilter: 'female' | 'male' | 'all' = 'all', // Default to 'all'
     @Query('page') page = '1', // Default to page 1
     @Query('limit') limit = '10', // Default to 10 items per page
-  ): Promise<{ users: { id: number,verifiedAccount:boolean, firstName: string, age: number, photo: string | null }[], total: number, page: number, limit: number }> {
+  ): Promise<{ users: { id: number, verifiedAccount: boolean, firstName: string, age: number, photo: string | null }[], total: number, page: number, limit: number }> {
     // Parse query parameters
     const ageRangeParsed = ageRange ? ageRange.split(',').map(Number) as [number, number] : undefined;
     const languagesParsed = languages ? languages.split(',') : undefined;
     const pageParsed = parseInt(page, 10);
     const limitParsed = parseInt(limit, 10);
-  
+
     // Pass parsed filters and pagination to the service
     const { users, total } = await this.userService.getExploreUsersBasic(userId, {
       ageRange: ageRangeParsed,
       city,
       country,
       languages: languagesParsed,
+      genderFilter, // Pass the gender filter
     }, {
       page: pageParsed,
       limit: limitParsed,
     });
-  
+
     return {
       users: users.map(user => ({
         id: user.id,
@@ -206,6 +208,7 @@ export class UserController {
       limit: limitParsed,
     };
   }
+
   
 
 
@@ -216,24 +219,30 @@ export class UserController {
       telegramId: user.telegramId,
       username: user.username,
       firstName: user.firstName,
-      lastName: user.lastName,
       city: user.city,
+      profileData: {
+        lookingFor: user.lookingFor,
+        education: user.education,
+        work: user.work,
+        bio: user.bio,
+      },
+      moreAboutMe: {
+        languages: user.languages,
+        height: user.height,
+        relationStatus: user.relationStatus,
+        sexuality: user.sexuality,
+        kids: user.kids,
+        smoking: user.smoking,
+        drink: user.drink,
+        pets: user.pets
+      },
       country: user.country,
-      languages: user.languages,
       interests: user.interests,
-      height: user.height,
       premium: user.premium,
       activityScore: user.activityScore,
       gender: user.gender,
-      lookingFor: user.lookingFor,
-      relationStatus: user.relationStatus,
-      sexuality: user.sexuality,
-      education: user.education,
-      work: user.work,
-      hobbies: user.hobbies,
       profileViews: user.profileViews,
       lastActive: user.lastActive,
-      bio: user.bio,
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({
         id: photo.id,
@@ -244,7 +253,6 @@ export class UserController {
       favoriteUsers: user.favoriteUsers,
       age: user.age,
       languagePreferences: user.languagePreferences, // Add language preferences
-      reportedUsers: user.reportedUsers,             // Add reported users
       isDeleted: user.isDeleted,                     // Add soft delete flag
       language: user.language,                       // Add language
       lat:user.lat,

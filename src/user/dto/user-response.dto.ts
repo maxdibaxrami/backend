@@ -7,21 +7,29 @@ export class UserResponseDto {
   lastName?: string;
   city?: string;
   country?: string;
-  languages?: string[];
   interests?: string[];
-  height?: number;
   premium: boolean;
   activityScore?: number;
   gender?: string;
-  lookingFor?: string;
-  relationStatus?: string;
-  sexuality?: string;
-  education?: string;
-  work?: string;
+  profileData?:{
+    lookingFor?: string;
+    education?: string;
+    work?: string;
+    bio?: string;
+  }
+  moreAboutMe?:{
+    relationStatus?: string;
+    sexuality?: string;
+    languages?: string[];
+    height?: number;
+    kids: string;
+    smoking: string;
+    drink: string;
+    pets: string;
+  }
   hobbies?: string[];
-  profileViews: number;
+  profileViews: string[];
   lastActive?: Date;
-  bio?: string;
   verifiedAccount: boolean;
   photos?: { id: number, url: string, order: number }[];  // Include photos
   blockedUsers?: number[];
