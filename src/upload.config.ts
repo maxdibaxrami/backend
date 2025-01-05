@@ -61,7 +61,7 @@ export async function processImage(inputFilePath: string): Promise<string> {
       await fs.unlink(inputFilePath);
     }
 
-    return outputFilePath;  // Return the new file path
+    return outputFilePath;  // Return the new file path with .webp extension
   } catch (error) {
     throw new Error(`Error processing image: ${error.message}`);
   }

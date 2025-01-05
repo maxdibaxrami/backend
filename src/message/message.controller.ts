@@ -3,9 +3,6 @@ import { MessageService } from './message.service';
 import { Message } from './entities/message.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { processImage, storage } from './upload.config';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { randomBytes } from 'crypto';
 
 export class MessageDto {
   id: number;
