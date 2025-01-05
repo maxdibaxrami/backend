@@ -2,7 +2,7 @@ import { Controller, Post, Body, Get, Param, Put, Delete, UseInterceptors, Uploa
 import { MessageService } from './message.service';
 import { Message } from './entities/message.entity';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { storage } from '../upload.config';
+import { processImage, storage } from './upload.config';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { randomBytes } from 'crypto';
@@ -39,24 +39,22 @@ export class MessageController {
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads/messages', // Make sure this matches the folder path
-        filename: (req, file, callback) => {
-          const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
-          callback(null, `${uniqueSuffix}${extname(file.originalname)}`);
-        },
-      }),
+      storage: storage,
     }),
   )
   async uploadFile(@Body() body: any, @UploadedFile() file: Express.Multer.File) {
-    if (!file) {
-      return { message: 'No file uploaded' };
+    
+    const filePath = file.path;
+    if (!filePath) {
+      throw new Error('File upload failed, no file path');
     }
+
+    const convertedFilePath = await processImage(filePath);
 
     // Assuming you have logic for saving this to the database or returning the URL
     return {
       message: 'File uploaded successfully',
-      mediaUrl: `uploads/messages/${file.filename}`,
+      mediaUrl: `uploads/messages/${convertedFilePath}`,
     };
   }
   

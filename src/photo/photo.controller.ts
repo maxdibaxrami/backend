@@ -1,8 +1,9 @@
 import { Controller, Post, UploadedFile, UseInterceptors, Body, Patch, Param } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { storage } from '../upload.config'; // Import the configurations
 import { PhotoService } from './photo.service';
 import { UserService } from 'src/user/user.service';
+import { processImage } from '../upload.config';  // Import the image processing function
+import {storage} from '../upload.config'
 
 @Controller('photo')
 export class PhotoController {
@@ -14,7 +15,7 @@ export class PhotoController {
   @Post('upload')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage,         // Use custom storage configuration
+      storage,  // Use custom storage configuration
     }),
   )
   async uploadPhoto(
@@ -28,14 +29,16 @@ export class PhotoController {
 
     const user = await this.userService.getUserById(userId);
 
-    // Ensure that file path exists (Multer should set this)
     const filePath = file.path;
     if (!filePath) {
       throw new Error('File upload failed, no file path');
     }
 
-    // Pass the filePath to the service
-    return this.photoService.addPhoto(user, filePath, order);
+    // Convert the image to webp format
+    const convertedFilePath = await processImage(filePath);
+
+    // Pass the converted file path to the service
+    return this.photoService.addPhoto(user, convertedFilePath, order);
   }
 
   @Patch('update-file/:id')
@@ -52,14 +55,15 @@ export class PhotoController {
       throw new Error('No file uploaded.');
     }
 
-    // Ensure the file path exists (Multer should set this)
     const filePath = file.path;
     if (!filePath) {
       throw new Error('File upload failed, no file path');
     }
 
+    // Convert the image to webp format
+    const convertedFilePath = await processImage(filePath);
+
     // Call the service to update the photo's URL with the new file path
-    return this.photoService.updatePhotoFile(photoId, filePath);
+    return this.photoService.updatePhotoFile(photoId, convertedFilePath);
   }
-  
 }
