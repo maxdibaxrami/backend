@@ -1,9 +1,9 @@
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
 import { randomBytes } from 'crypto';
 import * as sharp from 'sharp';  // Import sharp for image processing
 import { promises as fs } from 'fs';  // Importing fs.promises for file operations
 import * as heicConvert from 'heic-convert';  // Import heic-convert for HEIF/HEIC image conversion
+import { join } from 'path';
 
 // Storage configuration for file uploads
 export const storage = diskStorage({
@@ -29,17 +29,18 @@ export async function processImage(inputFilePath: string): Promise<string> {
     if (format === 'heif' || format === 'heic') {
       const inputBuffer = await fs.readFile(inputFilePath);
 
-      // Convert HEIF/HEIC to JPEG using heic-convert
+      // Convert HEIF/HEIC to JPEG first using heic-convert
       const outputBuffer = await heicConvert({
         buffer: inputBuffer,  // Convert the input buffer
         format: 'JPEG',       // Convert to JPEG first
         quality: 1            // Quality can be adjusted (1 is highest quality)
       });
 
+      // Save the temporary JPEG file
       const tempJpegPath = join('./uploads/messages', `${uniqueSuffix}.jpg`);
       await fs.writeFile(tempJpegPath, outputBuffer);
 
-      // Now convert the temporary JPEG image to WebP using sharp
+      // Now convert the JPEG image to WebP using sharp
       await sharp(tempJpegPath)
         .webp()  // Convert to WebP format
         .toFile(outputFilePath);

@@ -51,7 +51,7 @@ export class MessageController {
     // Assuming you have logic for saving this to the database or returning the URL
     return {
       message: 'File uploaded successfully',
-      mediaUrl: `uploads/messages/${convertedFilePath}`,
+      mediaUrl: convertedFilePath,
     };
   }
   
