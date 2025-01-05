@@ -60,7 +60,7 @@ export class User {
   @Column({ nullable: false })
   relationStatus: string;
 
-  @Column({ nullable: false, default: "straight" })
+  @Column({ nullable: false, default: "1" })
   sexuality: string;
 
   @Column({ nullable: true })
@@ -78,16 +78,16 @@ export class User {
   @Column({ nullable: true })
   bio?: string;
 
-  @Column({ nullable: false, default: "ratthernotsay" })
+  @Column({ nullable: false, default: "6" })
   kids: string;
 
-  @Column({ nullable: false, default: "ratthernotsay" })
+  @Column({ nullable: false, default: "5" })
   smoking: string;
 
-  @Column({ nullable: false, default: "ratthernotsay" })
+  @Column({ nullable: false, default: "5" })
   drink: string;
 
-  @Column({ nullable: false, default: "ratthernotsay" })
+  @Column({ nullable: false, default: "5" })
   pets: string;
 
   @Column({ default: false })
