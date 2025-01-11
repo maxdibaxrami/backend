@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne } from 'typeorm';
 import { Like } from '../like/like.entity';
 import { Match } from '../match/match.entity';
 import { Message } from '../message/entities/message.entity';
@@ -128,6 +128,22 @@ export class User {
 
   @OneToMany(() => Photo, (photo) => photo.user, { eager: true })
   photos: Photo[];
+
+  @Column({ unique: true })
+  referralCode: string;
+
+  @ManyToOne(() => User, user => user.referredUsers)
+  referrer: User;
+
+  @OneToMany(() => User, user => user.referrer)
+  referredUsers: User[];
+
+  @Column({ default: 0 })
+  rewardPoints: number;
+  
+  @Column()
+  createdAt: Date;
+  
 }
 
 

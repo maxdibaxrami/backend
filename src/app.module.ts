@@ -13,6 +13,7 @@ import { MatchModule } from './match/match.module';
 import { ChatModule } from './chat/chat.module';
 import { MessageModule } from './message/message.module';
 import { PhotoModule } from './photo/photo.module';
+import { TelegramModule } from './telegram/telegram.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { PhotoModule } from './photo/photo.module';
     ChatModule,
     MessageModule,
     PhotoModule,
+    TelegramModule,
   ],
   controllers: [AppController],
   providers: [AppService],

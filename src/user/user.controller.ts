@@ -90,6 +90,11 @@ export class UserController {
     return users.map(this.transformToUserResponseDto);
   }
 
+  @Get(':id/referral')
+  async getReferralLink(@Param('id') id: number): Promise<string> {
+    const user = await this.userService.getUserById(id);
+    return `https://t.me/YOUR_BOT_USERNAME?start=${user.referralCode}`;
+  }
 
   // Delete a user
   @Post('delete/:id')

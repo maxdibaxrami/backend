@@ -7,6 +7,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Photo } from '../photo/photo.entity';
 import { Like } from 'src/like/like.entity';
 import { Match } from 'src/match/match.entity';
+import { v4 as uuidv4 } from 'uuid';
 
 @Injectable()
 export class UserService {
@@ -76,10 +77,37 @@ export class UserService {
     try {
       // Ensure CreateUserDto matches User entity types
       const newUser = this.userRepository.create(createUserDto); // Use create for mapping
+      newUser.referralCode = uuidv4(); // Generate unique referral code
+      newUser.createdAt = new Date();
       return await this.userRepository.save(newUser); // Save the entity to the database
     } catch (error) {
       throw new InternalServerErrorException('Failed to create user', error.message);
     }
+  }
+
+  async findOneByReferralCode(referralCode: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { referralCode } });
+  }
+
+  async saveUserWithReferral(username: string, referralCode?: string): Promise<User> {
+    const user = new User();
+    user.username = username;
+  
+    if (referralCode) {
+      const referrer = await this.findOneByReferralCode(referralCode);
+      if (referrer) {
+        user.referrer = referrer;
+        referrer.rewardPoints += 10; // Award points to the referrer
+        await this.userRepository.save(referrer); // Save referrer with updated points
+      }
+    }
+  
+    user.referralCode = this.generateReferralCode();
+    return this.userRepository.save(user);
+  }
+
+  private generateReferralCode(): string {
+    return Math.random().toString(36).substring(2, 8); // Simple 6-character code
   }
 
   async getUserById(id: number): Promise<User> {
