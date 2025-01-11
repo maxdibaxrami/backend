@@ -1,6 +1,6 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { UserService } from '../user/user.service';
-import fetch from 'node-fetch';
+import axios from 'axios';
 
 @Controller('telegram')
 export class TelegramController {
@@ -37,15 +37,13 @@ export class TelegramController {
     const token = '7629971501:AAGXQE13v9Anu6Gf8hRbVKYeCnHhppyA_Ko'; // Use your bot's token
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
     
-    await fetch(url, {
-      method: 'POST',
+    await axios.post(url, {
+      chat_id: chatId,
+      text: text,
+    }, {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text,
-      }),
     });
   }
 }
