@@ -19,13 +19,13 @@ export class TelegramController {
       // Send the welcome message with image, caption, and buttons
       await this.sendMessage(
         message.chat.id,
-        //'AgACAgQAAxkBAAECdbRng2ht0WiRYZE9iMKIQuEJG8O0_QACyMUxGydWGVCyLHmVUZz5yQEAAwIAA20AAzYE', // file_id of the image
         'Welcome to Mull Mull \n Discover new connections, chat, and find matches that fit your vibe!',
         `https://t.me/${yourBotUsername}?start=${referralCode}`, // Mini app URL with referral code
         'https://t.me/mollmoll_chat' // Channel URL
       );
     }
   }
+        //'AgACAgQAAxkBAAECdbRng2ht0WiRYZE9iMKIQuEJG8O0_QACyMUxGydWGVCyLHmVUZz5yQEAAwIAA20AAzYE', // file_id of the image
 
   // Step 3: Extract the referral code from the /start command
   private extractReferralCode(text: string): string {
@@ -34,7 +34,7 @@ export class TelegramController {
   }
 
   // Step 4: Function to send message with image, caption, and inline buttons
-  private async sendMessage(chatId: string, fileId: string, text: string, miniAppUrl: string, channelUrl: string) {
+  private async sendMessage(chatId: string, text: string, miniAppUrl: string, channelUrl: string) {
     const token = '7629971501:AAGXQE13v9Anu6Gf8hRbVKYeCnHhppyA_Ko'; // Replace with your bot's token
     const url = `https://api.telegram.org/bot${token}/sendPhoto`; // Sending a photo message
 
