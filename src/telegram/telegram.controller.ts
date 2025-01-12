@@ -18,7 +18,7 @@ export class TelegramController {
       await this.sendMessage(
         message.chat.id,
         'Welcome to Mull Mull \n Discover new connections, chat, and find matches that fit your vibe!',
-        `https://t.me/${yourBotUsername}?start=${referralCode}`,
+        `https://t.me/${yourBotUsername}?startapp=${referralCode}`,
         'https://t.me/mollmoll_chat'
       );
     }
