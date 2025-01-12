@@ -13,11 +13,11 @@ export class TelegramController {
 
     if (message && message.text && message.text.startsWith('/start')) {
       const referralCode = this.extractReferralCode(message.text);
-
+      console.log(`https://t.me/${yourBotUsername}?startapp=${referralCode}`)
       // Send the welcome message with image, caption, and buttons
       await this.sendMessage(
         message.chat.id,
-        'Welcome to Mull Mull \n Discover new connections, chat, and find matches that fit your vibe!',
+        'Welcome to Mull Mull! \nDiscover new connections, chat, and find matches that fit your vibe!',
         `https://t.me/${yourBotUsername}?startapp=${referralCode}`,
         'https://t.me/mollmoll_chat'
       );
