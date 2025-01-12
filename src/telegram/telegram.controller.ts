@@ -23,7 +23,7 @@ export class TelegramController {
   }
 
   private async sendMessage(chatId: string, text: string) {
-    const token = 'YOUR_BOT_TOKEN_HERE'; // Use your bot's token
+    const token = '7629971501:AAGXQE13v9Anu6Gf8hRbVKYeCnHhppyA_Ko'; // Use your bot's token
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
     
     await axios.post(url, {
