@@ -19,7 +19,7 @@ export class TelegramController {
       // Send the welcome message with image, caption, and buttons
       await this.sendMessage(
         message.chat.id,
-        'AgACAgQAAxkBAAECdbRng2ht0WiRYZE9iMKIQuEJG8O0_QACyMUxGydWGVCyLHmVUZz5yQEAAwIAA20AAzYE', // file_id of the image
+        //'AgACAgQAAxkBAAECdbRng2ht0WiRYZE9iMKIQuEJG8O0_QACyMUxGydWGVCyLHmVUZz5yQEAAwIAA20AAzYE', // file_id of the image
         'Welcome to Mull Mull \n Discover new connections, chat, and find matches that fit your vibe!',
         `https://t.me/${yourBotUsername}?start=${referralCode}`, // Mini app URL with referral code
         'https://t.me/mollmoll_chat' // Channel URL
@@ -40,7 +40,7 @@ export class TelegramController {
 
     const resualt =  await axios.post(url, {
       chat_id: chatId,
-      photo: fileId, // Using the file_id instead of a URL
+      //photo: fileId, // Using the file_id instead of a URL
       caption: text, // Caption under the image
       reply_markup: {
         inline_keyboard: [
