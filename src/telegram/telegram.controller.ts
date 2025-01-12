@@ -38,7 +38,7 @@ export class TelegramController {
     const token = '7629971501:AAGXQE13v9Anu6Gf8hRbVKYeCnHhppyA_Ko'; // Replace with your bot's token
     const url = `https://api.telegram.org/bot${token}/sendPhoto`; // Sending a photo message
 
-    await axios.post(url, {
+    const resualt =  await axios.post(url, {
       chat_id: chatId,
       photo: fileId, // Using the file_id instead of a URL
       caption: text, // Caption under the image
@@ -61,5 +61,8 @@ export class TelegramController {
         'Content-Type': 'application/json',
       },
     });
+    console.log(resualt)
+
   }
+
 }
