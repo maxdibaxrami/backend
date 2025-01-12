@@ -10,31 +10,20 @@ export class TelegramController {
   async handleTelegramUpdate(@Body() update: any) {
     const message = update.message;
 
-    if (message && message.text && message.text.startsWith('/start')) {
-      const params = message.text.split(' ');
-      let referralCode = null;
-
-      if (params.length > 1) {
-        referralCode = params[1];
-      }
-
-      // Save the user with referral info
-      const username = message.from.username;
-      const newUser = await this.userService.saveUserWithReferral(username, referralCode);
-
-      // Send a welcome message or referral confirmation
-      let welcomeMessage = `Welcome, ${username}! You have been successfully registered.`;
-      if (newUser.referrer) {
-        welcomeMessage += `\nYou were referred by: ${newUser.referrer.username}`;
-      }
+      let welcomeMessage = `Welcome, ! You have been successfully registered.`;
 
       // Send the message to the user
       await this.sendMessage(message.chat.id, welcomeMessage);
-    }
+    
+  }
+
+  private extractReferralCode(text: string): string | null {
+    const urlParams = new URLSearchParams(text.split(' ')[1]?.replace('/start?', '') || '');
+    return urlParams.get('start');
   }
 
   private async sendMessage(chatId: string, text: string) {
-    const token = '7629971501:AAGXQE13v9Anu6Gf8hRbVKYeCnHhppyA_Ko'; // Use your bot's token
+    const token = 'YOUR_BOT_TOKEN_HERE'; // Use your bot's token
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
     
     await axios.post(url, {
