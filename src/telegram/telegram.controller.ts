@@ -13,7 +13,9 @@ export class TelegramController {
 
     if (message && message.text && message.text.startsWith('/start')) {
       const referralCode = this.extractReferralCode(message.text);
-      console.log(`https://t.me/${yourBotUsername}?startapp=${referralCode}`)
+      console.log('Extracted referral code:', referralCode); // Log the referral code for debugging
+      console.log(`https://t.me/${yourBotUsername}?startapp=${referralCode}`);
+
       // Send the welcome message with image, caption, and buttons
       await this.sendMessage(
         message.chat.id,
@@ -25,8 +27,11 @@ export class TelegramController {
   }
 
   private extractReferralCode(text: string): string {
-    const match = text.match(/start=([a-zA-Z0-9\-]+)/);
-    return match ? match[1] : null;
+    console.log('Incoming text:', text); // Log the full message text for debugging
+
+    // Adjusted regex to handle different cases
+    const match = text.match(/\/start\s*=?([a-zA-Z0-9\-]*)/);
+    return match && match[1] ? match[1] : null;
   }
 
   private async sendMessage(chatId: string, text: string, miniAppUrl: string, channelUrl: string) {
