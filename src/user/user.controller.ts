@@ -160,7 +160,7 @@ export class UserController {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    return this.transformToUserResponseDto(user);
+    return this.transformToUserTelegramResponseDto(user);
   }
 
 
