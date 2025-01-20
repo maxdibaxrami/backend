@@ -14,54 +14,51 @@ export const storage = diskStorage({
   },
 });
 
-export async function processImage(inputFilePath: string): Promise<string> {
-  // Generate a unique filename for the output image
+export async function processImage(inputFilePath: string): Promise<{ largeImagePath: string, smallImagePath: string }> {
+  // Generate a unique suffix for the output filenames
   const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
-  const outputFilePath = join('./uploads/profile-pictures', `${uniqueSuffix}.webp`); // Save to webp with a unique name
+  
+  // Define output paths for large and small versions of the image in different folders
+  const largeImagePath = join('./uploads/profile-pictures/large', `${uniqueSuffix}.webp`); // 1080px version
+  const smallImagePath = join('./uploads/profile-pictures/small', `${uniqueSuffix}.webp`);  // 320px version
 
   try {
     // Check the image format metadata
     const metadata = await sharp(inputFilePath).metadata();
     const format = metadata.format as string; // Assert format to string to allow flexible comparisons
 
+    // Define the sizes for large and small versions
+    const largeSize = { width: 430, height: 700 };
+    const smallSize = { width: 240, height: 240 };
+
     // Handle HEIF/HEIC separately using heic-convert
     if (format === 'heif' || format === 'heic') {
-      // Convert HEIF/HEIC to JPEG first using heic-convert
       const inputBuffer = await fs.readFile(inputFilePath);
-      
-      // Convert HEIC/HEIF to JPEG
       const outputBuffer = await heicConvert({
-        buffer: inputBuffer, // Input as buffer
-        format: 'JPEG',       // Convert to JPEG first
-        quality: 1            // You can adjust the quality if needed
+        buffer: inputBuffer,
+        format: 'JPEG',
+        quality: 1
       });
 
-      // Save the JPEG file
       const tempJpegPath = join('./uploads/profile-pictures', `${uniqueSuffix}.jpg`);
       await fs.writeFile(tempJpegPath, outputBuffer);
 
-      // Now convert the JPEG to WebP using sharp
-      await sharp(tempJpegPath)
-        .webp()  // Convert to WebP format
-        .toFile(outputFilePath);
+      // Save the large and small versions in different folders
+      await sharp(tempJpegPath).resize(largeSize).webp().toFile(largeImagePath);
+      await sharp(tempJpegPath).resize(smallSize).webp().toFile(smallImagePath);
 
-      // Optionally delete the temporary JPEG file
       await fs.unlink(tempJpegPath);
-
-      // Optionally delete the original HEIC file
       await fs.unlink(inputFilePath);
 
     } else {
-      // If the image isn't HEIF/HEIC, directly convert to WebP using sharp
-      await sharp(inputFilePath)
-        .webp()  // Convert to WebP format
-        .toFile(outputFilePath);
+      // Directly process non-HEIC images, saving large and small versions in different folders
+      await sharp(inputFilePath).resize(largeSize).webp().toFile(largeImagePath);
+      await sharp(inputFilePath).resize(smallSize).webp().toFile(smallImagePath);
 
-      // Optionally delete the original file
       await fs.unlink(inputFilePath);
     }
 
-    return outputFilePath;  // Return the new file path with .webp extension
+    return { largeImagePath, smallImagePath };
   } catch (error) {
     throw new Error(`Error processing image: ${error.message}`);
   }

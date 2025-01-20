@@ -394,7 +394,7 @@ export class UserService {
       id: user.id,
       firstName: user.firstName,
       age: user.age,
-      imageUrl: user.photos.length ? user.photos[0].url : null, // Return first photo if available
+      imageUrl: user.photos.length ? user.photos[0].smallUrl : null, // Return first photo if available
     };
   }
   

@@ -125,7 +125,7 @@ export class LikeService {
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({
         id: photo.id,
-        url: photo.url,
+        url: photo.smallUrl,
         order: photo.order,
       })) : [],
       age: user.age,

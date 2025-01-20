@@ -7,7 +7,10 @@ export class Photo {
   id: number;
 
   @Column()
-  url: string;  // Path to the photo file
+  largeUrl: string;  // Path to the large photo file
+
+  @Column()
+  smallUrl: string;  // Path to the small photo file
 
   @Column()
   order: number;  // Order of the photo (1-6)

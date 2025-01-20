@@ -21,16 +21,29 @@ export class PhotoService {
   async deletePhoto(photoId: number): Promise<void> {
     await this.photoRepository.delete(photoId);
   }
-
-  // Updated addPhoto method - no resizing, just save the original photo path
-  async addPhoto(user: User, photoPath: string, order: number): Promise<Photo> {
+  async addPhoto(user: User, largePhotoPath: string, smallPhotoPath: string, order: number): Promise<Photo> {
     const newPhoto = this.photoRepository.create({
-      url: photoPath,  // Save the original photo path
+      largeUrl: largePhotoPath,  // Save the large photo path
+      smallUrl: smallPhotoPath,  // Save the small photo path
       order,
       user,
     });
 
     return this.photoRepository.save(newPhoto);
+  }
+
+  async updatePhotoFile(photoId: number, newLargePhotoPath: string, newSmallPhotoPath: string): Promise<Photo> {
+    const photo = await this.photoRepository.findOne({ where: { id: photoId } });
+  
+    if (!photo) {
+      throw new Error('Photo not found');
+    }
+  
+    // Update the URLs with the new file paths
+    photo.largeUrl = newLargePhotoPath;
+    photo.smallUrl = newSmallPhotoPath;
+  
+    return this.photoRepository.save(photo);
   }
 
   async updatePhoto(photoId: number, newPhotoPath: string, order?: number): Promise<Photo> {
@@ -41,23 +54,10 @@ export class PhotoService {
     }
 
     // Update the photo fields
-    photo.url = newPhotoPath;
+    photo.largeUrl = newPhotoPath;  // Update the large image URL
     if (order !== undefined) {
       photo.order = order;
     }
-
-    return this.photoRepository.save(photo);
-  }
-
-  async updatePhotoFile(photoId: number, newPhotoPath: string): Promise<Photo> {
-    const photo = await this.photoRepository.findOne({ where: { id: photoId } });
-
-    if (!photo) {
-      throw new Error('Photo not found');
-    }
-
-    // Update the URL with the new photo file path
-    photo.url = newPhotoPath;
 
     return this.photoRepository.save(photo);
   }

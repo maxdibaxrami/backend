@@ -199,7 +199,7 @@ export class UserController {
         firstName: user.firstName,
         age: user.age,
         verifiedAccount: user.verifiedAccount,
-        photo: user.photos[0]?.url || null, // Assuming the first photo is the main one
+        photo: user.photos[0]?.smallUrl || null, // Assuming the first photo is the main one
       })),
       total,
       page: pageParsed,
@@ -257,7 +257,8 @@ export class UserController {
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({
         id: photo.id,
-        url: photo.url,
+        small: photo.smallUrl,
+        large: photo.largeUrl,
         order: photo.order,
       })) : [], 
       age: user.age,
@@ -319,7 +320,7 @@ export class UserController {
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({
         id: photo.id,
-        url: photo.url,
+        largeUrl: photo.largeUrl,
         order: photo.order,
       })) : [], 
       blockedUsers: profileBlockedUserList,

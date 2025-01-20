@@ -29,7 +29,7 @@ export class UserResponseDto {
   favoriteUsers?: { id: number; firstName: string; age?: number; imageUrl?: string }[]; // Updated
   lastActive?: Date;
   verifiedAccount: boolean;
-  photos?: { id: number; url: string; order: number }[];
+  photos?: { id: number; small?: string; large?: string; order: number }[];
   blockedUsers?: { id: number; firstName: string; age?: number; imageUrl?: string }[];
   favoriteUsersList?: { id: number; firstName: string; age?: number; imageUrl?: string }[]; // New field
   profileViewsList?: { id: number; firstName: string; age?: number; imageUrl?: string }[];  // New field

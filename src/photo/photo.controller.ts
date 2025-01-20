@@ -28,18 +28,18 @@ export class PhotoController {
     }
 
     const user = await this.userService.getUserById(userId);
-
     const filePath = file.path;
     if (!filePath) {
       throw new Error('File upload failed, no file path');
     }
 
-    // Convert the image to webp format
-    const convertedFilePath = await processImage(filePath);
+    // Process the image to generate both large and small versions
+    const { largeImagePath, smallImagePath } = await processImage(filePath);
 
-    // Pass the converted file path to the service
-    return this.photoService.addPhoto(user, convertedFilePath, order);
+    // Pass both image paths to the service
+    return this.photoService.addPhoto(user, largeImagePath, smallImagePath, order);  // Ensure all arguments are passed
   }
+
 
   @Patch('update-file/:id')
   @UseInterceptors(
@@ -54,16 +54,19 @@ export class PhotoController {
     if (!file) {
       throw new Error('No file uploaded.');
     }
-
+  
     const filePath = file.path;
     if (!filePath) {
       throw new Error('File upload failed, no file path');
     }
-
-    // Convert the image to webp format
-    const convertedFilePath = await processImage(filePath);
-
-    // Call the service to update the photo's URL with the new file path
-    return this.photoService.updatePhotoFile(photoId, convertedFilePath);
+  
+    // Process the image to generate both large and small versions
+    const { largeImagePath, smallImagePath } = await processImage(filePath);
+  
+    // Call the service to update the photo's URLs with the new file paths
+    return this.photoService.updatePhotoFile(photoId, largeImagePath, smallImagePath);
   }
+  
 }
+
+
