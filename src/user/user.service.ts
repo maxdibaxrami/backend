@@ -380,7 +380,7 @@ export class UserService {
     return { users, total };
   }
   
-  async getUserSummary(userId: number): Promise<{ id: number; firstName: string; age?: number; imageUrl?: string }> {
+  async getUserSummary(userId: number): Promise<{ id: number; firstName: string; age?: number; imageUrl?: string ; verifiedAccount?: boolean ; premium?: boolean }> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['photos'],
@@ -394,6 +394,8 @@ export class UserService {
       id: user.id,
       firstName: user.firstName,
       age: user.age,
+      verifiedAccount : user.verifiedAccount,
+      premium: user.premium,
       imageUrl: user.photos.length ? user.photos[0].smallUrl : null, // Return first photo if available
     };
   }
