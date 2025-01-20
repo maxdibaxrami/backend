@@ -253,6 +253,7 @@ export class UserController {
       premium: user.premium,
       activityScore: user.activityScore,
       gender: user.gender,
+      profileViewsIds:user.profileViews,
       lastActive: user.lastActive,
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({

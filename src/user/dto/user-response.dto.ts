@@ -41,4 +41,5 @@ export class UserResponseDto {
   lon?: number;
   referralCode?:string;
   rewardPoints?:number;
+  profileViewsIds?:number[]
 }
