@@ -9,8 +9,6 @@ import {
   Delete, 
   HttpException, 
   HttpStatus , 
-  UseInterceptors, 
-  UploadedFile,
   Query
 } from '@nestjs/common';
 import { User } from './user.entity';
@@ -18,7 +16,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { UserService } from './user.service';
-import { PhotoService } from '../photo/photo.service';
 
 @Controller('users')
 export class UserController {
@@ -210,6 +207,20 @@ export class UserController {
     };
   }
 
+  @Post('apply-referral-reward/:referralCode')
+  async applyReferralReward(@Param('referralCode') referralCode: string): Promise<string> {
+    // Find the user by referral code
+    const newUser = await this.userService.findOneByReferralCode(referralCode);
+    if (!newUser) {
+      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    }
+
+    // Apply referral reward for the user who has this referral code
+    await this.userService.applyReferralReward(newUser);
+
+    // Return a success message
+    return 'Referral reward applied successfully';
+  }
   
 
 
@@ -255,6 +266,8 @@ export class UserController {
       language: user.language,                       // Add language
       lat:user.lat,
       lon:user.lon,
+      referralCode: user.referralCode,
+      rewardPoints: user.rewardPoints
       
     };
   }  
@@ -316,6 +329,10 @@ export class UserController {
       language: user.language,
       lat: user.lat,
       lon: user.lon,
+      referralCode: user.referralCode,
+      rewardPoints: user.rewardPoints
+
+
     };
   }
   

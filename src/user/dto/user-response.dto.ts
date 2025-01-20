@@ -39,4 +39,6 @@ export class UserResponseDto {
   language: string;
   lat?: number;
   lon?: number;
+  referralCode?:string;
+  rewardPoints?:number;
 }

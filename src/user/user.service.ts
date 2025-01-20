@@ -85,27 +85,35 @@ export class UserService {
     }
   }
 
-  async findOneByReferralCode(referralCode: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { referralCode } });
+  async findOneByReferralCode(referralCode: string): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { referralCode },
+    });
   }
 
   async applyReferralReward(newUser: User): Promise<void> {
     if (newUser.referralCode) {
-      // Find the referring user by the referral code
+      // Step 1: Check if the newUser has a referralCode
+      // If the new user has a referral code, proceed.
+  
+      // Step 2: Find the referrer (the user who referred the newUser)
       const referrer = await this.userRepository.findOne({
         where: { referralCode: newUser.referralCode },
       });
-
+  
+      // Step 3: If a referrer is found, increase their reward points
       if (referrer) {
-        // Apply the reward to the referring user
-        referrer.rewardPoints += 1; // Example: increase rewards count
+        referrer.rewardPoints += 1; // Increment reward points (example: 1 point per referral)
+        
+        // Step 4: Save the updated referrer user data to the database
         await this.userRepository.save(referrer);
-
-        // Optionally, send a notification to the referrer
-        // sendNotificationToReferrer(referrer); // Implement this as needed
+  
+        // Optionally, Step 5: Send a notification to the referrer
+        // sendNotificationToReferrer(referrer); // Not implemented, but you could send a message to notify the referrer
       }
     }
   }
+  
 
   private generateReferralCode(): string {
     return Math.random().toString(36).substring(2, 8); // Simple 6-character code
