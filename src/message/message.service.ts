@@ -122,9 +122,9 @@ export class MessageService {
       .addSelect('message.senderId', 'senderId') // Select the sender ID
       .addSelect('message.recipientId', 'recipientId') // Select the recipient ID
       .addSelect('sender.firstName', 'senderFirstName') // Select sender's first name
-      .addSelect('senderPhoto.url', 'senderPhotoUrl') // Select sender's photo URL
+      .addSelect('senderPhoto.smallUrl', 'senderPhotoUrl') // Select sender's photo URL
       .addSelect('recipient.firstName', 'recipientFirstName') // Select recipient's first name
-      .addSelect('recipientPhoto.url', 'recipientPhotoUrl') // Select recipient's photo URL
+      .addSelect('recipientPhoto.smallUrl', 'recipientPhotoUrl') // Select recipient's photo URL
       .leftJoin('message.sender', 'sender') // Join with the sender (User entity)
       .leftJoin('sender.photos', 'senderPhoto') // Join with the sender's Photo entity
       .leftJoin('message.recipient', 'recipient') // Join with the recipient (User entity)
