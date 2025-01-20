@@ -39,8 +39,8 @@ export class User {
   @Column('text', { array: true, nullable: true, default: [] })
   languages?: string[];
 
-  @Column('text', { array: true, nullable: true, default: [] })
-  interests?: string[];
+  @Column('int', { array: true, nullable: true, default: [] })
+  interests?: number[];
 
   @Column({ nullable: true })
   height?: number;
@@ -69,8 +69,8 @@ export class User {
   @Column({ nullable: true })
   work?: string;
 
-  @Column('text', { array: true, nullable: true, default: [] })
-  profileViews: string[];
+  @Column('int', { array: true, nullable: true, default: [] })
+  profileViews: number[];
 
   @Column({ nullable: true })
   lastActive?: Date;
@@ -96,10 +96,10 @@ export class User {
   @Column('int', { array: true, nullable: true, default: [] })
   blockedUsers: number[];
 
-  @Column('simple-array', { default: [] })
+  @Column('int', { array: true, nullable: true, default: [] })
   reportedUsers: number[];
 
-  @Column('simple-array', { nullable: true, default: [] })
+  @Column('int', { array: true, nullable: true, default: [] })
   favoriteUsers?: number[];
 
   @Column({ default: false })

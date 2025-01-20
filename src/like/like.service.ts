@@ -121,7 +121,6 @@ export class LikeService {
       premium: user.premium,
       activityScore: user.activityScore,
       gender: user.gender,
-      profileViews: user.profileViews,
       lastActive: user.lastActive,
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({
@@ -129,8 +128,6 @@ export class LikeService {
         url: photo.url,
         order: photo.order,
       })) : [],
-      blockedUsers: user.blockedUsers,
-      favoriteUsers: user.favoriteUsers,
       age: user.age,
       languagePreferences: user.languagePreferences,
       isDeleted: user.isDeleted,

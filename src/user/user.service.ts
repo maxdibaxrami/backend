@@ -372,6 +372,23 @@ export class UserService {
     return { users, total };
   }
   
+  async getUserSummary(userId: number): Promise<{ id: number; firstName: string; age?: number; imageUrl?: string }> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['photos'],
+    });
+  
+    if (!user) {
+      return null;
+    }
+  
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      age: user.age,
+      imageUrl: user.photos.length ? user.photos[0].url : null, // Return first photo if available
+    };
+  }
   
   
   

@@ -36,8 +36,8 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  interests?: string[];
+  @IsNumber()
+  interests?: number[];
 
   @IsOptional()
   @IsNumber()
@@ -73,11 +73,6 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   work: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  profileViews: string[];
   
 
   @IsDate()

@@ -1,45 +1,42 @@
-
 export class UserResponseDto {
   id: number;
   telegramId: string;
   username?: string;
   firstName?: string;
-  lastName?: string;
   city?: string;
-  country?: string;
-  interests?: string[];
-  premium: boolean;
-  activityScore?: number;
-  gender?: string;
-  profileData?:{
-    lookingFor?: string;
+  profileData: {
+    lookingFor: string;
     education?: string;
     work?: string;
     bio?: string;
-  }
-  moreAboutMe?:{
-    relationStatus?: string;
-    sexuality?: string;
+  };
+  moreAboutMe: {
     languages?: string[];
     height?: number;
+    relationStatus: string;
+    sexuality: string;
     kids: string;
     smoking: string;
     drink: string;
     pets: string;
-  }
-  hobbies?: string[];
-  profileViews: string[];
+  };
+  country?: string;
+  interests?: number[];
+  premium: boolean;
+  activityScore?: number;
+  gender: string;
+  profileViews?: { id: number; firstName: string; age?: number; imageUrl?: string }[]; // Updated
+  favoriteUsers?: { id: number; firstName: string; age?: number; imageUrl?: string }[]; // Updated
   lastActive?: Date;
   verifiedAccount: boolean;
-  photos?: { id: number, url: string, order: number }[];  // Include photos
-  blockedUsers?: number[];
-  favoriteUsers?: number[];
-  age: number;
+  photos?: { id: number; url: string; order: number }[];
+  blockedUsers?: { id: number; firstName: string; age?: number; imageUrl?: string }[];
+  favoriteUsersList?: { id: number; firstName: string; age?: number; imageUrl?: string }[]; // New field
+  profileViewsList?: { id: number; firstName: string; age?: number; imageUrl?: string }[];  // New field
+  age?: number;
+  languagePreferences?: string[];
+  isDeleted: boolean;
+  language: string;
   lat?: number;
   lon?: number;
-  // New fields based on updated entity
-  languagePreferences?: string[];  // User's language preferences
-  reportedUsers?: number[];        // List of reported users' IDs
-  isDeleted?: boolean;             // Soft delete flag
-  language?: string;               // User's preferred language
 }

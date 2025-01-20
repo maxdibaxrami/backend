@@ -17,17 +17,13 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
-import { diskStorage } from 'multer';
-import * as path from 'path';
 import { PhotoService } from '../photo/photo.service';
 
 @Controller('users')
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private readonly photoService: PhotoService,  // Inject PhotoService
   ) {}
   // Create a new user profile
   @Post('create')
@@ -80,7 +76,7 @@ export class UserController {
     if (!user) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
-    return this.transformToUserResponseDto(user);
+    return this.transformToUserTelegramResponseDto(user);
   }
 
   // Fetch all users
@@ -246,7 +242,6 @@ export class UserController {
       premium: user.premium,
       activityScore: user.activityScore,
       gender: user.gender,
-      profileViews: user.profileViews,
       lastActive: user.lastActive,
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({
@@ -254,8 +249,6 @@ export class UserController {
         url: photo.url,
         order: photo.order,
       })) : [], 
-      blockedUsers: user.blockedUsers,
-      favoriteUsers: user.favoriteUsers,
       age: user.age,
       languagePreferences: user.languagePreferences, // Add language preferences
       isDeleted: user.isDeleted,                     // Add soft delete flag
@@ -265,4 +258,65 @@ export class UserController {
       
     };
   }  
+
+  private async transformToUserTelegramResponseDto(user: User): Promise<UserResponseDto> {
+
+    const favoriteUsersList = await Promise.all(
+      (user.favoriteUsers ?? []).map(userId => this.userService.getUserSummary(userId)) // Check for null/undefined
+    );
+    
+    const profileViewsList = await Promise.all(
+      (user.profileViews ?? []).map(userId => this.userService.getUserSummary(userId)) // Check for null/undefined
+    );
+  
+    const profileBlockedUserList = await Promise.all(
+      (user.blockedUsers ?? []).map(userId => this.userService.getUserSummary(userId)) // Check for null/undefined
+    );
+
+    return {
+      id: user.id,
+      telegramId: user.telegramId,
+      username: user.username,
+      firstName: user.firstName,
+      city: user.city,
+      profileData: {
+        lookingFor: user.lookingFor,
+        education: user.education,
+        work: user.work,
+        bio: user.bio,
+      },
+      moreAboutMe: {
+        languages: user.languages,
+        height: user.height,
+        relationStatus: user.relationStatus,
+        sexuality: user.sexuality,
+        kids: user.kids,
+        smoking: user.smoking,
+        drink: user.drink,
+        pets: user.pets
+      },
+      country: user.country,
+      interests: user.interests,
+      premium: user.premium,
+      activityScore: user.activityScore,
+      gender: user.gender,
+      profileViews: profileViewsList, // Updated
+      favoriteUsers:favoriteUsersList, // Updated
+      lastActive: user.lastActive,
+      verifiedAccount: user.verifiedAccount,
+      photos: user.photos ? user.photos.map(photo => ({
+        id: photo.id,
+        url: photo.url,
+        order: photo.order,
+      })) : [], 
+      blockedUsers: profileBlockedUserList,
+      age: user.age,
+      languagePreferences: user.languagePreferences,
+      isDeleted: user.isDeleted,
+      language: user.language,
+      lat: user.lat,
+      lon: user.lon,
+    };
+  }
+  
 }
