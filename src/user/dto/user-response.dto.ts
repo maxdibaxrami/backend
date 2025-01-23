@@ -42,4 +42,5 @@ export class UserResponseDto {
   referralCode?:string;
   rewardPoints?:number;
   profileViewsIds?:number[]
+  giftUsers?: { id: number; firstName: string; age?: number; imageUrl?: string }[];
 }

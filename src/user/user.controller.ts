@@ -222,6 +222,21 @@ export class UserController {
     return 'Referral reward applied successfully';
   }
   
+  @Post('increase-reward')
+  async increaseReferralReward(
+    @Body('referrerId') referrerId: number,
+    @Body('amount') amount: number,
+  ): Promise<void> {
+    await this.userService.increaseReferralReward(referrerId, amount);
+  }
+
+  @Post('decrease-reward')
+  async decreaseReferralReward(
+    @Body('referrerId') referrerId: number,
+    @Body('amount') amount: number,
+  ): Promise<void> {
+    await this.userService.decreaseReferralReward(referrerId, amount);
+  }
 
 
   // Helper function to transform User entity to UserResponseDto
@@ -288,6 +303,10 @@ export class UserController {
       (user.blockedUsers ?? []).map(userId => this.userService.getUserSummary(userId)) // Check for null/undefined
     );
 
+    const profilegiftUsersList = await Promise.all(
+      (user.giftUsers ?? []).map(userId => this.userService.getUserSummary(userId)) // Check for null/undefined
+    );
+
     return {
       id: user.id,
       telegramId: user.telegramId,
@@ -317,6 +336,7 @@ export class UserController {
       gender: user.gender,
       profileViews: profileViewsList, // Updated
       favoriteUsers:favoriteUsersList, // Updated
+      giftUsers:profilegiftUsersList,
       lastActive: user.lastActive,
       verifiedAccount: user.verifiedAccount,
       photos: user.photos ? user.photos.map(photo => ({

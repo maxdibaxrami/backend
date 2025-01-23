@@ -113,6 +113,30 @@ export class UserService {
       }
     }
   }
+
+  private async updateReferralReward(referrerId: number, amount: number): Promise<void> {
+    // Step 1: Find the referrer by their user ID
+    const referrer = await this.userRepository.findOne({
+      where: { id: referrerId },
+    });
+  
+    // Step 2: If a referrer is found, update their reward points
+    if (referrer) {
+      referrer.rewardPoints += amount; // Can be positive (increase) or negative (decrease)
+      await this.userRepository.save(referrer);
+  
+      // Optionally notify the referrer about the update
+      // sendNotificationToReferrer(referrer); // Not implemented
+    }
+  }
+
+  async decreaseReferralReward(user: number, amount: number): Promise<void> {
+    await this.updateReferralReward(user, -amount);
+  }
+
+  async increaseReferralReward(user: number, amount: number): Promise<void> {
+    await this.updateReferralReward(user, amount);
+  }
   
 
   private generateReferralCode(): string {

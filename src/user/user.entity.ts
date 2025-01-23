@@ -102,6 +102,9 @@ export class User {
   @Column('int', { array: true, nullable: true, default: [] })
   favoriteUsers?: number[];
 
+  @Column('int', { array: true, nullable: true, default: [] })
+  giftUsers?: number[];
+
   @Column({ default: false })
   isDeleted: boolean;
 
