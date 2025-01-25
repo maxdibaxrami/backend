@@ -86,7 +86,7 @@ export class PhotoController {
     // Call the face verification service and pass the buffer directly
     const result = await this.photoService.verifyFaceWithBuffer(userId, uploadedPhotoBuffer);
     if(result.verified === true){
-      this.userService.setPremiumStatus(userId, true)
+      this.userService.setVerifiedAccountStatus(userId, true)
     }
     return result;
   }

@@ -43,6 +43,15 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  async setVerifiedAccountStatus(id: number, verifiedAccount: boolean): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.verifiedAccount = verifiedAccount;
+    return this.userRepository.save(user);
+  }
+
   async blockUser(userId: number, blockedUserId: number): Promise<any> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
   
