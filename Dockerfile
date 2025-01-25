@@ -4,11 +4,14 @@ FROM ubuntu:22.04 AS build
 # Set working directory
 WORKDIR /usr/src/app
 
-# Update GPG keys for Ubuntu
+# Change the repository mirrors to avoid GPG issues
+RUN sed -i 's/http:\/\/archive.ubuntu.com/http:\/\/mirror.us.ubuntu.com/g' /etc/apt/sources.list
+
+# Update Ubuntu GPG keys for apt
 RUN curl -fsSL https://packages.ubuntu.com/ubuntu-archive-keyring.gpg | tee /etc/apt/trusted.gpg.d/ubuntu.asc
 
 # Install dependencies and necessary build tools
-RUN apt-get update && apt-get install -y \
+RUN apt-get update --allow-unauthenticated && apt-get install -y \
   gnupg2 \
   curl \
   python3 \
@@ -44,7 +47,7 @@ FROM ubuntu:22.04
 WORKDIR /usr/src/app
 
 # Install dependencies for production environment
-RUN apt-get update && apt-get install -y \
+RUN apt-get update --allow-unauthenticated && apt-get install -y \
   curl \
   python3 \
   python3-pip \
