@@ -1,15 +1,15 @@
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { randomBytes } from 'crypto';
-import * as sharp from 'sharp';  // Import sharp for image processing
-import { promises as fs } from 'fs';  // Importing fs.promises for file operations
-import * as heicConvert from 'heic-convert';  // Import heic-convert
+import * as sharp from 'sharp';  // Image processing library
+import { promises as fs } from 'fs';  // File system operations
+import * as heicConvert from 'heic-convert';  // HEIC to JPEG converter
 
 export const storage = diskStorage({
   destination: './uploads/profile-pictures', // Modify destination if needed
   filename: (req, file, callback) => {
-    const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`; 
-    const fileExtension = '.webp';  // Force webp format
+    const uniqueSuffix = `${Date.now()}-${randomBytes(4).toString('hex')}`;
+    const fileExtension = '.webp';  // Force webp format for all files
     callback(null, `${uniqueSuffix}${fileExtension}`);
   },
 });
@@ -28,8 +28,8 @@ export async function processImage(inputFilePath: string): Promise<{ largeImageP
     const format = metadata.format as string; // Assert format to string to allow flexible comparisons
 
     // Define the sizes for large and small versions
-    const largeSize = { width: 430, height: 700 };
-    const smallSize = { width: 240, height: 240 };
+    const largeSize = { width: 1080, height: 1080 };  // Large image: Width 1080px
+    const smallSize = { width: 320, height: 320 };   // Small image: Width 320px
 
     // Handle HEIF/HEIC separately using heic-convert
     if (format === 'heif' || format === 'heic') {
@@ -47,19 +47,23 @@ export async function processImage(inputFilePath: string): Promise<{ largeImageP
       await sharp(tempJpegPath).resize(largeSize).webp().toFile(largeImagePath);
       await sharp(tempJpegPath).resize(smallSize).webp().toFile(smallImagePath);
 
+      // Cleanup temporary file
       await fs.unlink(tempJpegPath);
-      await fs.unlink(inputFilePath);
+      await fs.unlink(inputFilePath);  // Remove the original HEIC file
 
     } else {
       // Directly process non-HEIC images, saving large and small versions in different folders
       await sharp(inputFilePath).resize(largeSize).webp().toFile(largeImagePath);
       await sharp(inputFilePath).resize(smallSize).webp().toFile(smallImagePath);
 
+      // Clean up original image file after processing
       await fs.unlink(inputFilePath);
     }
 
+    // Return the paths to the processed images
     return { largeImagePath, smallImagePath };
   } catch (error) {
+    // Throwing an error with a descriptive message if something goes wrong
     throw new Error(`Error processing image: ${error.message}`);
   }
 }
