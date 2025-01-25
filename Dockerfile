@@ -46,13 +46,6 @@ FROM ubuntu:22.04
 # Set working directory
 WORKDIR /usr/src/app
 
-# Install dependencies for production environment
-RUN apt-get update --allow-unauthenticated && apt-get install -y \
-  curl \
-  python3 \
-  python3-pip \
-  && apt-get clean
-
 # Set the Python environment variable for npm and node-gyp
 ENV PYTHON=/usr/bin/python3
 ENV NODE_ENV=production
