@@ -10,21 +10,6 @@ RUN sed -i 's/http:\/\/archive.ubuntu.com/http:\/\/mirror.us.ubuntu.com/g' /etc/
 # Update Ubuntu GPG keys for apt
 RUN curl -fsSL https://packages.ubuntu.com/ubuntu-archive-keyring.gpg | tee /etc/apt/trusted.gpg.d/ubuntu.asc
 
-# Install dependencies and necessary build tools
-RUN apt-get update --allow-unauthenticated && apt-get install -y \
-  gnupg2 \
-  curl \
-  python3 \
-  python3-pip \
-  python3-dev \
-  build-essential \
-  libcairo2-dev \
-  libjpeg-dev \
-  libpango1.0-dev \
-  librsvg2-dev \
-  git \
-  && apt-get clean
-
 # Copy package.json and package-lock.json
 COPY package*.json ./
 
@@ -45,6 +30,13 @@ FROM ubuntu:22.04
 
 # Set working directory
 WORKDIR /usr/src/app
+
+# Install dependencies for production environment
+RUN apt-get update --allow-unauthenticated && apt-get install -y \
+  curl \
+  python3 \
+  python3-pip \
+  && apt-get clean
 
 # Set the Python environment variable for npm and node-gyp
 ENV PYTHON=/usr/bin/python3
