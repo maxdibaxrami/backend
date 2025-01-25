@@ -4,6 +4,9 @@ FROM ubuntu:22.04 AS build
 # Set working directory
 WORKDIR /usr/src/app
 
+# Update GPG keys for Ubuntu
+RUN curl -fsSL https://packages.ubuntu.com/ubuntu-archive-keyring.gpg | tee /etc/apt/trusted.gpg.d/ubuntu.asc
+
 # Install dependencies and necessary build tools
 RUN apt-get update && apt-get install -y \
   gnupg2 \
