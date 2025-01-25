@@ -5,7 +5,7 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Install Python, build tools, and dependencies for canvas
-RUN apk add --no-cache python3 make g++ pkg-config cairo-dev pango-dev pixman-dev
+RUN apk add --no-cache python3 make g++ cairo-dev pango-dev pixman-dev pkgconfig
 
 # Copy package.json and package-lock.json
 COPY package*.json ./
