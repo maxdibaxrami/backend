@@ -11,11 +11,11 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data  # Recreate the database volume
     networks:
       - app_network
     env_file:
-      - .env  # Load environment variables from .env file
+      - .env
 
   app:
     build: .
@@ -34,14 +34,14 @@ services:
       - app_network
     volumes:
       - .:/usr/src/app
-      - ./uploads:/usr/src/app/uploads
+      - ./uploads:/usr/src/app/uploads  # Recreate the uploads volume (check if ./uploads exists)
     working_dir: /usr/src/app
     command: npm run start:dev
     env_file:
-      - .env  # Load environment variables from .env file
+      - .env
 
 volumes:
-  postgres_data:
+  postgres_data:  # This will recreate the volume for PostgreSQL data storage
 
 networks:
   app_network:
