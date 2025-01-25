@@ -1,4 +1,4 @@
-import { Controller, Post, UploadedFile, UseInterceptors, Body } from '@nestjs/common';
+import { Controller, Post, UploadedFile, UseInterceptors, Body, Patch, Param } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PhotoService } from './photo.service';
 import { UserService } from 'src/user/user.service';
@@ -39,6 +39,32 @@ export class PhotoController {
     return this.photoService.addPhoto(user, largeImagePath, smallImagePath, order);
   }
 
+  @Patch('update-file/:id')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage,  // Use custom storage configuration for handling file upload
+    }),
+  )
+  async updatePhotoFile(
+    @Param('id') photoId: number,
+    @UploadedFile() file: Express.Multer.File
+  ) {
+    if (!file) {
+      throw new Error('No file uploaded.');
+    }
+  
+    const filePath = file.path;
+    if (!filePath) {
+      throw new Error('File upload failed, no file path');
+    }
+  
+    // Process the image to generate both large and small versions
+    const { largeImagePath, smallImagePath } = await processImage(filePath);
+  
+    // Call the service to update the photo's URLs with the new file paths
+    return this.photoService.updatePhotoFile(photoId, largeImagePath, smallImagePath);
+  }
+  
   // New endpoint for face verification
   @Post('verify')
   @UseInterceptors(
