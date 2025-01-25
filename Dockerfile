@@ -1,6 +1,9 @@
 # Base image
 FROM node:18-alpine
 
+# Install dependencies required for node-gyp (Python, make, g++)
+RUN apk add --no-cache python3 make g++ 
+
 # Set working directory
 WORKDIR /usr/src/app
 
