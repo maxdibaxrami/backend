@@ -8,16 +8,9 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install dependencies and necessary build tools
-RUN apt-get update && apt-get install -y \
-  python3 \
-  python3-pip \
-  python3-dev \
-  build-essential \
-  libcairo2-dev \
-  libjpeg-dev \
-  libpango1.0-dev \
-  librsvg2-dev \
-  && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y gnupg2 curl \
+  && curl -fsSL https://ftp-master.debian.org/keys/archive-key-10.asc | tee /etc/apt/trusted.gpg.d/debian.asc \
+  && apt-get update
 
 # Set the Python environment variable for npm and node-gyp
 ENV PYTHON=/usr/bin/python3
