@@ -112,7 +112,7 @@ export class UserService {
   
       // Step 3: If a referrer is found, increase their reward points
       if (referrer) {
-        referrer.rewardPoints += 1; // Increment reward points (example: 1 point per referral)
+        referrer.rewardPoints += 50; // Increment reward points (example: 1 point per referral)
         
         // Step 4: Save the updated referrer user data to the database
         await this.userRepository.save(referrer);
