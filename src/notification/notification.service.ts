@@ -48,7 +48,7 @@ export class NotificationService {
     const savedNotification = await this.notificationRepository.save(notification);
 
     // Send Telegram message after saving the notification
-    await this.sendTelegramMessage(user.telegramId, message);
+    this.sendTelegramMessage(user.telegramId, message);
 
     return savedNotification;
   }
@@ -56,6 +56,7 @@ export class NotificationService {
   // Other CRUD methods (findAll, findOne, update, remove) remain the same
 
   private async sendTelegramMessage(telegramId: string, text: string) {
+    
     const token = '7629971501:AAGXQE13v9Anu6Gf8hRbVKYeCnHhppyA_Ko'; // Replace with your bot's token
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
