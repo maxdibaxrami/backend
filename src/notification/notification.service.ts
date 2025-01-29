@@ -60,7 +60,7 @@ export class NotificationService {
     const token = '7629971501:AAGXQE13v9Anu6Gf8hRbVKYeCnHhppyA_Ko'; // Replace with your bot's token
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
 
-    const result = await axios.post(
+    axios.post(
       url,
       {
         chat_id: telegramId,
@@ -73,6 +73,5 @@ export class NotificationService {
       }
     );
 
-    console.log(result.data);
   }
 }
