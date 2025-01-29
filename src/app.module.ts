@@ -14,6 +14,7 @@ import { ChatModule } from './chat/chat.module';
 import { MessageModule } from './message/message.module';
 import { PhotoModule } from './photo/photo.module';
 import { TelegramModule } from './telegram/telegram.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { TelegramModule } from './telegram/telegram.module';
     MessageModule,
     PhotoModule,
     TelegramModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -4,7 +4,9 @@ import { Repository } from 'typeorm';
 import { Like } from './like.entity';
 import { Match } from '../match/match.entity';
 import { User } from '../user/user.entity';
-import { UserResponseDto } from 'src/user/dto/user-response.dto';
+import { UserResponseDto } from 'src/user/dto/user-response.dto'
+import { Notification } from 'src/notification/entities/notification/notification';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class LikeService {
@@ -13,6 +15,8 @@ export class LikeService {
     private likeRepository: Repository<Like>,
     @InjectRepository(Match)
     private matchRepository: Repository<Match>,
+    private notificationService: NotificationService, // Inject NotificationService
+
   ) {}
 
   async likeUser(userId: number, likedUserId: number): Promise<{ message: string; matchCreated: boolean }> {
@@ -60,7 +64,7 @@ export class LikeService {
         matchedAt: new Date(),
       });
       await this.matchRepository.save(match);
-  
+      this.notificationService.createNotification("you received new Like", likedUserId)
       return {
         message: 'Match created!',
         matchCreated: true,
@@ -73,7 +77,9 @@ export class LikeService {
         isLiked: false,
       });
       await this.likeRepository.save(like);
-  
+      this.notificationService.createNotification("you received new Match!", likedUserId)
+      this.notificationService.createNotification("you received new Match!", userId)
+
       return {
         message: 'Like recorded.',
         matchCreated: false,

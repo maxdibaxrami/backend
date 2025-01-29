@@ -3,6 +3,7 @@ import { Like } from '../like/like.entity';
 import { Match } from '../match/match.entity';
 import { Message } from '../message/entities/message.entity';
 import { Photo } from '../photo/photo.entity';  // Import the Photo entity
+import { Notification } from '../notification/entities/notification/notification';
 
 @Entity('users')
 export class User {
@@ -141,12 +142,15 @@ export class User {
   @OneToMany(() => User, user => user.referrer)
   referredUsers: User[];
 
-  @Column({ default: 0 })
+  @Column({ default: 40 })
   rewardPoints: number;
   
   @Column()
   createdAt: Date;
-  
+
+  @OneToMany(() => Notification, (notification) => notification.user, { cascade: true })
+  notifications: Notification[];
+
 }
 
 
