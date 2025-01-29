@@ -7,7 +7,10 @@ import { Match } from '../match/match.entity'; // Import Match entity for inject
 import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Like, Match,NotificationModule])],  // Register Like and Match repositories
+  imports: [
+    TypeOrmModule.forFeature([Like, Match]),  // Register Like and Match repositories
+    NotificationModule,  // Import NotificationModule correctly
+  ],
   providers: [LikeService],
   controllers: [LikeController],
 })
