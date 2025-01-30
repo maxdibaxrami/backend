@@ -26,20 +26,7 @@ export class PhotoService {
     private readonly photoRepository: Repository<Photo>,
   ) {}
 
-  async loadFaceApiModels(): Promise<void> {
-    if (!this.modelsLoaded) {
-      try {
-        await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
-        await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
-        await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
-        this.modelsLoaded = true;
-      } catch (error) {
-        console.error('Error loading face-api models:', error);
-        throw new Error('Failed to load face-api models');
-      }
-    }
-  }
-
+  
   async getPhotosByUser(userId: number): Promise<Photo[]> {
     return this.photoRepository.find({
       where: { user: { id: userId } },
@@ -77,6 +64,20 @@ export class PhotoService {
 
   // New method for face verification
 
+  async loadFaceApiModels(): Promise<void> {
+    if (!this.modelsLoaded) {
+      try {
+        await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
+        await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
+        await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
+        this.modelsLoaded = true;
+      } catch (error) {
+        console.error('Error loading face-api models:', error);
+        throw new Error('Failed to load face-api models');
+      }
+    }
+  }
+  
   async verifyFaceWithBuffer(userId: number, uploadedPhotoBuffer: Buffer): Promise<{ verified: boolean, similarity: number }> {
     // Load models once
     await this.loadFaceApiModels();
@@ -92,8 +93,8 @@ export class PhotoService {
 
     // Parallel image processing
     const [profileImageBuffer, uploadedImageBuffer] = await Promise.all([
-      sharp(profilePhotoFullPath).resize(400).jpeg().toBuffer(),
-      sharp(uploadedPhotoBuffer).resize(400).jpeg().toBuffer(),
+      sharp(profilePhotoFullPath).resize({ width: 400 }).jpeg().toBuffer(),
+      sharp(uploadedPhotoBuffer).resize({ width: 400 }).jpeg().toBuffer(),
     ]);
 
     // Load images from buffers
