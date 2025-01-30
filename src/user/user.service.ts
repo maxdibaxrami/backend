@@ -8,6 +8,7 @@ import { Photo } from '../photo/photo.entity';
 import { Like } from 'src/like/like.entity';
 import { Match } from 'src/match/match.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,8 @@ export class UserService {
     private likeRepository: Repository<Like>,
     @InjectRepository(Like) // If you're using Like repository
     private matchRepository: Repository<Match>,
+    private notificationService: NotificationService, // Inject NotificationService
+    
   ) {}
 
 
@@ -136,6 +139,8 @@ export class UserService {
   
       // Optionally notify the referrer about the update
       // sendNotificationToReferrer(referrer); // Not implemented
+      this.notificationService.createNotification("🌟 Referral add Successfull! ", referrer.id)
+
     }
   }
 

@@ -6,11 +6,13 @@ import { MessageController } from './message.controller';
 import { Message } from './entities/message.entity';
 import { UserModule } from '../user/user.module'; // Import UserModule
 import { User } from '../user/user.entity';
+import { NotificationModule } from 'src/notification/notification.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Message, User]), // Register Message and User repositories
     UserModule, // Import UserModule to get access to UserRepository
+    NotificationModule,
   ],
   providers: [MessageService],
   controllers: [MessageController],

@@ -5,7 +5,6 @@ import { Like } from './like.entity';
 import { Match } from '../match/match.entity';
 import { User } from '../user/user.entity';
 import { UserResponseDto } from 'src/user/dto/user-response.dto'
-import { Notification } from 'src/notification/entities/notification/notification';
 import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
@@ -65,8 +64,8 @@ export class LikeService {
       });
       await this.matchRepository.save(match);
 
-      this.notificationService.createNotification("Match created!", likedUserId)
-      this.notificationService.createNotification("Match created!", userId)
+      this.notificationService.createNotification("🎈 Match created!", likedUserId)
+      this.notificationService.createNotification("🎈 Match created!", userId)
 
       return {
         message: 'Match created!',
@@ -81,7 +80,7 @@ export class LikeService {
       });
       await this.likeRepository.save(like);
 
-      this.notificationService.createNotification("Someone like you!", likedUserId)
+      this.notificationService.createNotification("❤️ Someone like you!", likedUserId)
       
       return {
         message: 'Like recorded.',

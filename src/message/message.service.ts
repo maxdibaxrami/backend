@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Message } from './entities/message.entity';
 import { User } from 'src/user/user.entity';
+import { NotificationService } from 'src/notification/notification.service';
 
 export class MessageDto {
   id: number;
@@ -19,6 +20,7 @@ export class MessageService {
   constructor(
     @InjectRepository(Message) private messageRepository: Repository<Message>, // Inject MessageRepository
     @InjectRepository(User) private userRepository: Repository<User>, // Inject UserRepository
+    private notificationService: NotificationService, // Inject NotificationService
   ) {}
 
   async createMessage(
@@ -42,6 +44,7 @@ export class MessageService {
       mediaUrl,  // Store the mediaUrl in the message entity
     });
 
+    this.notificationService.createNotification("🌟 Referral add Successfull! ", recipient.id)
     return await this.messageRepository.save(message);
   }
 
