@@ -19,14 +19,11 @@ faceapi.env.monkeyPatch({
 
 @Injectable()
 export class PhotoService {
-  private modelsLoaded = false;
-
   constructor(
     @InjectRepository(Photo)
     private readonly photoRepository: Repository<Photo>,
   ) {}
 
-  
   async getPhotosByUser(userId: number): Promise<Photo[]> {
     return this.photoRepository.find({
       where: { user: { id: userId } },
@@ -62,60 +59,59 @@ export class PhotoService {
     return this.photoRepository.save(photo);
   }
 
-
+  // New method for face verification
 
   async verifyFaceWithBuffer(userId: number, uploadedPhotoBuffer: Buffer): Promise<{ verified: boolean, similarity: number }> {
-    // Load models once
-
     // Load user's profile photo (large image)
     const userPhotos = await this.getPhotosByUser(userId);
     if (userPhotos.length === 0) {
       throw new Error('User has no profile photos');
     }
   
-    const profilePhotoPath = userPhotos[0].largeUrl;
+    const profilePhotoPath = userPhotos[0].largeUrl;  // Assuming the first photo is the profile image
     const profilePhotoFullPath = path.join(__dirname, '..', '..', profilePhotoPath);
-
-    // Parallel image processing
-    const [profileImageBuffer, uploadedImageBuffer] = await Promise.all([
-      sharp(profilePhotoFullPath).resize({ width: 400 }).jpeg().toBuffer(),
-      sharp(uploadedPhotoBuffer).resize({ width: 400 }).jpeg().toBuffer(),
-    ]);
-
-    // Load images from buffers
-    const [profileImage, uploadedImage] = await Promise.all([
-      loadImage(profileImageBuffer),
-      loadImage(uploadedImageBuffer),
-    ]);
-
+  
+    console.log('Profile Photo Full Path:', profilePhotoFullPath);
+  
+    // Convert WebP to PNG using sharp
+    const profileImageBuffer = await sharp(profilePhotoFullPath).jpeg().toBuffer();
+    const uploadedImageBuffer = await sharp(uploadedPhotoBuffer).jpeg().toBuffer();
+  
+    // Load the images from buffers
+    const profileImage = await loadImage(profileImageBuffer);
+    const uploadedImage = await loadImage(uploadedImageBuffer);
+  
+    // Load face-api models
     await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
     await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
     await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
-    
-    // Face detection
-    const profileDetection = await faceapi.detectSingleFace(profileImage as unknown as faceapi.TNetInput, new faceapi.TinyFaceDetectorOptions())
+  
+    // Detect faces and compute face descriptors
+    const profileDetection = await faceapi.detectSingleFace(profileImage as unknown as faceapi.TNetInput)
       .withFaceLandmarks()
       .withFaceDescriptor();
-
-    const uploadedDetection = await faceapi.detectSingleFace(uploadedImage as unknown as faceapi.TNetInput, new faceapi.TinyFaceDetectorOptions())
+  
+    const uploadedDetection = await faceapi.detectSingleFace(uploadedImage as unknown as faceapi.TNetInput)
       .withFaceLandmarks()
       .withFaceDescriptor();
-
+  
     if (!profileDetection) {
-      throw new Error('Face not detected in profile photo');
+      throw new Error('Face not detected in first image of profile');
     }
 
     if (!uploadedDetection) {
-      throw new Error('Face not detected in uploaded photo');
+      throw new Error('Face not detected in verify photo');
     }
-
-    // Calculate similarity
+  
+    // Calculate the Euclidean distance between the two face descriptors
     const distance = faceapi.euclideanDistance(profileDetection.descriptor, uploadedDetection.descriptor);
-    const isMatch = distance < 0.5;
-
+  
+    // Threshold for face similarity (you can tweak this)
+    const isMatch = distance < 0.6;
+  
     return {
       verified: isMatch,
-      similarity: 1 - distance,
+      similarity: 1 - distance,  // Convert distance to similarity score (1 - distance)
     };
   }
 }
