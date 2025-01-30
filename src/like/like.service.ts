@@ -64,8 +64,8 @@ export class LikeService {
       });
       await this.matchRepository.save(match);
 
-      this.notificationService.createNotification("🎈 Match created!", likedUserId)
-      this.notificationService.createNotification("🎈 Match created!", userId)
+      this.notificationService.createNotification("Match created! 🎈", likedUserId)
+      this.notificationService.createNotification("Match created! 🎈", userId)
 
       return {
         message: 'Match created!',
@@ -80,7 +80,7 @@ export class LikeService {
       });
       await this.likeRepository.save(like);
 
-      this.notificationService.createNotification("❤️ Someone like you!", likedUserId)
+      this.notificationService.createNotification("Someone like you! ❤️", likedUserId)
       
       return {
         message: 'Like recorded.',

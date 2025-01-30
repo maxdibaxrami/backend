@@ -4,12 +4,14 @@ import { Repository } from 'typeorm';
 import { Message } from '../message/entities/message.entity';
 import { createWriteStream } from 'fs';
 import { join } from 'path';
+import { NotificationService } from 'src/notification/notification.service';
 
 @Injectable()
 export class ChatService {
   constructor(
     @InjectRepository(Message)
     private readonly messageRepository: Repository<Message>,
+    private notificationService: NotificationService, // Inject NotificationService
   ) {}
 
   async saveMessage(data: { senderId: number; recipientId: number; content?: string; mediaUrl?: string; }): Promise<Message> {
@@ -19,6 +21,7 @@ export class ChatService {
       content: data.content,
       mediaUrl: data.mediaUrl,
     });
+    this.notificationService.createNotification("You have new Message! 💌", +data.recipientId)
     return this.messageRepository.save(message);  // Fix: No need for `message[0]`, just save the message
 }
   async markAsRead(messageId: number, userId: number): Promise<Message> {

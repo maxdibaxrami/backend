@@ -139,7 +139,7 @@ export class UserService {
   
       // Optionally notify the referrer about the update
       // sendNotificationToReferrer(referrer); // Not implemented
-      this.notificationService.createNotification("🌟 Referral add Successfull! ", referrer.id)
+      this.notificationService.createNotification(`Referral add Successfull! 🌟 your energy:${referrer.rewardPoints += amount}.`, referrer.id)
 
     }
   }

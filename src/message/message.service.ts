@@ -44,7 +44,6 @@ export class MessageService {
       mediaUrl,  // Store the mediaUrl in the message entity
     });
 
-    this.notificationService.createNotification("🌟 Referral add Successfull! ", recipient.id)
     return await this.messageRepository.save(message);
   }
 
