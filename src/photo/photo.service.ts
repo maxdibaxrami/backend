@@ -62,25 +62,10 @@ export class PhotoService {
     return this.photoRepository.save(photo);
   }
 
-  // New method for face verification
 
-  async loadFaceApiModels(): Promise<void> {
-    if (!this.modelsLoaded) {
-      try {
-        await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
-        await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
-        await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
-        this.modelsLoaded = true;
-      } catch (error) {
-        console.error('Error loading face-api models:', error);
-        throw new Error('Failed to load face-api models');
-      }
-    }
-  }
-  
+
   async verifyFaceWithBuffer(userId: number, uploadedPhotoBuffer: Buffer): Promise<{ verified: boolean, similarity: number }> {
     // Load models once
-    await this.loadFaceApiModels();
 
     // Load user's profile photo (large image)
     const userPhotos = await this.getPhotosByUser(userId);
@@ -103,6 +88,10 @@ export class PhotoService {
       loadImage(uploadedImageBuffer),
     ]);
 
+    await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
+    await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
+    await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
+    
     // Face detection
     const profileDetection = await faceapi.detectSingleFace(profileImage as unknown as faceapi.TNetInput, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
