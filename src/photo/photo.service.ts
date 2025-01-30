@@ -9,8 +9,6 @@ import { loadImage } from 'canvas';
 import * as path from 'path';  // Ensure this import is at the top of your file
 import * as sharp from 'sharp';
 
-require('@tensorflow/tfjs-node');
-
 // Initialize canvas for face-api.js
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({
