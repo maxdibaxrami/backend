@@ -9,6 +9,8 @@ import { loadImage } from 'canvas';
 import * as path from 'path';  // Ensure this import is at the top of your file
 import * as sharp from 'sharp';
 
+require('@tensorflow/tfjs-node');
+
 // Initialize canvas for face-api.js
 const { Canvas, Image, ImageData } = canvas;
 faceapi.env.monkeyPatch({
@@ -19,10 +21,21 @@ faceapi.env.monkeyPatch({
 
 @Injectable()
 export class PhotoService {
+  private modelsLoaded = false;
+
   constructor(
     @InjectRepository(Photo)
     private readonly photoRepository: Repository<Photo>,
   ) {}
+
+  async loadFaceApiModels(): Promise<void> {
+    if (!this.modelsLoaded) {
+      await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
+      await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
+      await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
+      this.modelsLoaded = true;
+    }
+  }
 
   async getPhotosByUser(userId: number): Promise<Photo[]> {
     return this.photoRepository.find({
@@ -62,56 +75,54 @@ export class PhotoService {
   // New method for face verification
 
   async verifyFaceWithBuffer(userId: number, uploadedPhotoBuffer: Buffer): Promise<{ verified: boolean, similarity: number }> {
+    // Load models once
+    await this.loadFaceApiModels();
+
     // Load user's profile photo (large image)
     const userPhotos = await this.getPhotosByUser(userId);
     if (userPhotos.length === 0) {
       throw new Error('User has no profile photos');
     }
   
-    const profilePhotoPath = userPhotos[0].largeUrl;  // Assuming the first photo is the profile image
+    const profilePhotoPath = userPhotos[0].largeUrl;
     const profilePhotoFullPath = path.join(__dirname, '..', '..', profilePhotoPath);
-  
-    console.log('Profile Photo Full Path:', profilePhotoFullPath);
-  
-    // Convert WebP to PNG using sharp
-    const profileImageBuffer = await sharp(profilePhotoFullPath).jpeg().toBuffer();
-    const uploadedImageBuffer = await sharp(uploadedPhotoBuffer).jpeg().toBuffer();
-  
-    // Load the images from buffers
-    const profileImage = await loadImage(profileImageBuffer);
-    const uploadedImage = await loadImage(uploadedImageBuffer);
-  
-    // Load face-api models
-    await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
-    await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
-    await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
-  
-    // Detect faces and compute face descriptors
-    const profileDetection = await faceapi.detectSingleFace(profileImage as unknown as faceapi.TNetInput)
+
+    // Parallel image processing
+    const [profileImageBuffer, uploadedImageBuffer] = await Promise.all([
+      sharp(profilePhotoFullPath).resize(400).jpeg().toBuffer(),
+      sharp(uploadedPhotoBuffer).resize(400).jpeg().toBuffer(),
+    ]);
+
+    // Load images from buffers
+    const [profileImage, uploadedImage] = await Promise.all([
+      loadImage(profileImageBuffer),
+      loadImage(uploadedImageBuffer),
+    ]);
+
+    // Face detection
+    const profileDetection = await faceapi.detectSingleFace(profileImage as unknown as faceapi.TNetInput, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
       .withFaceDescriptor();
-  
-    const uploadedDetection = await faceapi.detectSingleFace(uploadedImage as unknown as faceapi.TNetInput)
+
+    const uploadedDetection = await faceapi.detectSingleFace(uploadedImage as unknown as faceapi.TNetInput, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
       .withFaceDescriptor();
-  
+
     if (!profileDetection) {
-      throw new Error('Face not detected in first image of profile');
+      throw new Error('Face not detected in profile photo');
     }
 
     if (!uploadedDetection) {
-      throw new Error('Face not detected in verify photo');
+      throw new Error('Face not detected in uploaded photo');
     }
-  
-    // Calculate the Euclidean distance between the two face descriptors
+
+    // Calculate similarity
     const distance = faceapi.euclideanDistance(profileDetection.descriptor, uploadedDetection.descriptor);
-  
-    // Threshold for face similarity (you can tweak this)
-    const isMatch = distance < 0.6;
-  
+    const isMatch = distance < 0.5;
+
     return {
       verified: isMatch,
-      similarity: 1 - distance,  // Convert distance to similarity score (1 - distance)
+      similarity: 1 - distance,
     };
   }
 }
