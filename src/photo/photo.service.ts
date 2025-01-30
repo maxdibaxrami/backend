@@ -28,10 +28,15 @@ export class PhotoService {
 
   async loadFaceApiModels(): Promise<void> {
     if (!this.modelsLoaded) {
-      await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
-      await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
-      await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
-      this.modelsLoaded = true;
+      try {
+        await faceapi.nets.ssdMobilenetv1.loadFromDisk('./models');
+        await faceapi.nets.faceLandmark68Net.loadFromDisk('./models');
+        await faceapi.nets.faceRecognitionNet.loadFromDisk('./models');
+        this.modelsLoaded = true;
+      } catch (error) {
+        console.error('Error loading face-api models:', error);
+        throw new Error('Failed to load face-api models');
+      }
     }
   }
 
