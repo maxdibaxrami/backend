@@ -63,6 +63,7 @@ export class NotificationService {
       await axios.post(url, {
         chat_id: telegramId,
         text: text,
+        message_auto_delete_time:10
       });
     } catch (error) {
       if (error.response && error.response.status === 429) {
